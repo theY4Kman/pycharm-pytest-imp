@@ -52,7 +52,6 @@ private object PyTestFunctionLambdaFixtureArgumentCompletion : CompletionProvide
 private object LambdaFixtureReferenceArgumentCompletion : CompletionProvider<CompletionParameters>() {
     override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
         val argList = PsiTreeUtil.getParentOfType(parameters.position, PyArgumentList::class.java) ?: return
-        val module = ModuleUtilCore.findModuleForPsiElement(argList) ?: return
         val typeEvalContext = TypeEvalContext.codeCompletion(argList.project, argList.containingFile)
 
         val usedRefs = HashSet<String>()
@@ -62,7 +61,7 @@ private object LambdaFixtureReferenceArgumentCompletion : CompletionProvider<Com
             }
         })
 
-        getLambdaFixtures(module, parameters.position, typeEvalContext)
+        getLambdaFixtures(parameters.position, typeEvalContext)
                 .filter { !usedRefs.contains(it.name) }
                 .forEach {
                     result.addElement(PythonLookupElement(it.name, false, AllIcons.Nodes.Variable))
