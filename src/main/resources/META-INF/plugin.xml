@@ -1,0 +1,41 @@
+<idea-plugin>
+    <id>com.y4kstudios.imp</id>
+    <name>PyCharm Imp</name>
+    <version>1.0</version>
+    <vendor email="they4kman@gmail.com" url="https://y4k.dev">Y4K Studios</vendor>
+
+    <description><![CDATA[
+      Improvements to the PyCharm experience, including support for pytest lambda fixtures
+    ]]></description>
+
+    <change-notes><![CDATA[
+      - Add support for auto-completing lambda fixtures
+    ]]>
+    </change-notes>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="174.0"/>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.python</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <psi.referenceContributor language="Python"
+                                  implementation="com.y4kstudios.imp.testing.pyTestFixtures.LambdaFixtureReferenceContributor"/>
+        <completion.contributor language="Python"
+                                implementationClass="com.y4kstudios.imp.testing.pyTestFixtures.PyTestParameterCompletionContributor"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="Pythonid">
+        <inspectionExtension implementation="com.y4kstudios.imp.testing.pyTestFixtures.LambdaFixtureInspectionExtension"/>
+        <typeProvider implementation="com.y4kstudios.imp.testing.pyTestFixtures.LambdaFixtureTypeProvider"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+
+</idea-plugin>
