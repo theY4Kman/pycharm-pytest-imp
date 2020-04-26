@@ -1,6 +1,6 @@
 <idea-plugin>
-    <id>com.y4kstudios.imp</id>
-    <name>PyCharm Imp</name>
+    <id>com.y4kstudios.pytestimp</id>
+    <name>pytest imp</name>
     <version>1.0</version>
     <vendor email="they4kman@gmail.com" url="https://y4k.dev">Y4K Studios</vendor>
 
@@ -24,14 +24,14 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <psi.referenceContributor language="Python"
-                                  implementation="com.y4kstudios.imp.testing.pyTestFixtures.LambdaFixtureReferenceContributor"/>
+                                  implementation="com.y4kstudios.pytestimp.LambdaFixtureReferenceContributor"/>
         <completion.contributor language="Python"
-                                implementationClass="com.y4kstudios.imp.testing.pyTestFixtures.PyTestParameterCompletionContributor"/>
+                                implementationClass="com.y4kstudios.pytestimp.PyTestParameterCompletionContributor"/>
     </extensions>
 
     <extensions defaultExtensionNs="Pythonid">
-        <inspectionExtension implementation="com.y4kstudios.imp.testing.pyTestFixtures.LambdaFixtureInspectionExtension"/>
-        <typeProvider implementation="com.y4kstudios.imp.testing.pyTestFixtures.LambdaFixtureTypeProvider"/>
+        <inspectionExtension implementation="com.y4kstudios.pytestimp.LambdaFixtureInspectionExtension"/>
+        <typeProvider implementation="com.y4kstudios.pytestimp.LambdaFixtureTypeProvider"/>
     </extensions>
 
     <actions>

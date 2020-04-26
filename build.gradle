@@ -15,7 +15,7 @@ plugins {
 apply plugin: 'kotlin'
 
 group 'com.y4kstudios'
-version '1.0-SNAPSHOT'
+version '0.1.0'
 
 sourceCompatibility = 1.8
 
@@ -33,17 +33,55 @@ dependencies {
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     version 'PY-2020.1'
+    pluginName 'pytest imp'
 
     plugins=['python', 'PsiViewer:201.6251.22-EAP-SNAPSHOT.3']
 }
 patchPluginXml {
-    changeNotes """
-      - Add support for auto-completing lambda fixtures
-    """
+    changeNotes extractChangeNotes()
+    pluginDescription '''
+        <p>pytest improvements plugin for PyCharm</p>
+    '''
 }
 prepareSandbox {
     preserve {
         include 'plugins/psiviewer/**'
         include 'system/plugins/**'
     }
+}
+
+// Very primitive changelog extraction code
+// Source: https://github.com/JetBrains/ideavim/blob/d5055506b019b7cdb4ba786a086dfc9385a42705/build.gradle#L107-L129
+def extractChangeNotes() {
+    def header = '<ul>\n'
+    def footer = '</ul>\n<p>See also the complete <a href="https://github.com/theY4Kman/pycharm-pytest-imp/blob/master/CHANGELOG.md">changelog</a>.</p>'
+
+    def startLine = "_Available since $version EAP:_"
+    def endLine = '_To Be Released..._'
+    def changeType = ''
+    def startSaving = false
+    def res = new StringBuilder(header)
+    new File('./CHANGELOG.md').eachLine { line ->
+        if (startSaving) {
+            if (line == endLine) {
+                startSaving = false
+            }
+            else if (line.startsWith('**') && line.endsWith(':**')) {
+                changeType = line.substring(2, line.length() - 3)
+                changeType = changeType.replaceFirst('s$', '')
+            }
+            else if (line.startsWith(' - ')) {
+                def item = line.substring(3)
+                res.append("  <li><b>$changeType:</b> $item</li>").append('\n')
+            }
+        }
+        else {
+            if (line == startLine) {
+                startSaving = true
+            }
+        }
+    }
+
+    res.append(footer)
+    return res.toString()
 }

@@ -1,10 +1,11 @@
-package com.y4kstudios.imp.testing.pyTestFixtures
+package com.y4kstudios.pytestimp
 
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.util.Processor
 import com.jetbrains.python.PyNames
 import com.jetbrains.python.nameResolver.NameResolverTools
 import com.jetbrains.python.psi.*
@@ -40,8 +41,7 @@ internal fun getLambdaFixture(element: PyNamedParameter, typeEvalContext: TypeEv
 }
 
 internal fun getLambdaFixture(element: PyStringLiteralExpression, typeEvalContext: TypeEvalContext): PyTestFixture? {
-    val module = ModuleUtilCore.findModuleForPsiElement(element) ?: return null
-    return getLambdaFixtures(module, element, typeEvalContext).firstOrNull { o -> o.name == element.stringValue }
+    return getLambdaFixtures(element, typeEvalContext).firstOrNull { o -> o.name == element.stringValue }
 }
 
 
@@ -59,10 +59,10 @@ internal fun getLambdaFixtures(module: Module, forWhat: PyCallable, typeEvalCont
     }
 
     val selfName = if (forWhat is PyFunction) forWhat.name else PsiTreeUtil.getParentOfType(forWhat, PyTargetExpression::class.java)?.name
-    return getLambdaFixtures(module, forWhat as PsiElement, typeEvalContext).filter { it.name != selfName }
+    return getLambdaFixtures(forWhat as PsiElement, typeEvalContext).filter { it.name != selfName }
 }
 
-internal fun getLambdaFixtures(module: Module, forWhat: PsiElement, typeEvalContext: TypeEvalContext): List<PyTestFixture> {
+internal fun getLambdaFixtures(forWhat: PsiElement, typeEvalContext: TypeEvalContext): List<PyTestFixture> {
     val topLevelFixtures =
             ((forWhat.containingFile as? PyFile)?.topLevelAttributes ?: emptyList())
                     .mapNotNull { it.asFixture }
@@ -72,11 +72,26 @@ internal fun getLambdaFixtures(module: Module, forWhat: PsiElement, typeEvalCont
     val forWhatClass = PsiTreeUtil.getParentOfType(forWhat, PyClass::class.java) ?: return topLevelFixtures
 
     val classBasedFixtures = mutableListOf<PyTestFixture>()
-    forWhatClass.visitClassAttributes({ target ->
-        target.asFixture?.let { classBasedFixtures.add(it) }
-        true
-    }, true, typeEvalContext)
+    forWhatClass.visitUpwardNestedClassAttributes(
+        Processor { target ->
+            target?.asFixture?.let { classBasedFixtures.add(it) }
+            true
+        },
+        typeEvalContext
+    )
     return classBasedFixtures + topLevelFixtures
+}
+
+internal fun PyClass.visitUpwardNestedClassAttributes(processor: Processor<PyTargetExpression>, context: TypeEvalContext) {
+    var pyClass = this
+
+    while (true) {
+        pyClass.visitClassAttributes(processor, true, context)
+
+        pyClass = PsiTreeUtil.getParentOfType(pyClass, PyStatementList::class.java)?.let {
+            PsiTreeUtil.getParentOfType(it, PyClass::class.java)
+        } ?: return
+    }
 }
 
 internal fun PyTestFixture.getLambdaFunction(): PyLambdaExpression? =  (resolveTarget as? PyTargetExpression)?.getLambdaFunction()
@@ -120,11 +135,7 @@ internal fun PyCallExpression.getLambdaFixtureType(context: TypeEvalContext): Re
                 ?: return null
 
         return when (lambdaRefs.size) {
-            // XXX: if there are multiple positional arguments, but only one has a valid reference,
-            //      this type will be incorrect
             1 -> lambdaRefs.first()?.getCall()?.getLambdaFixtureType(context) ?: Ref()
-
-            // XXX: if a reference is missing, this tuple will be incorrect
             else -> Ref(PyTupleType.create(this, lambdaRefs.map { it?.getCall()?.getLambdaFixtureType(context)?.get() }))
         }
 

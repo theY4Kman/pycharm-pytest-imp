@@ -30,9 +30,9 @@ class TestThings:
     def stuff(self):
         pass
 
-    def test_shit(self):
+    def test_shit(self, real):
         pass
 
     class TestSub:
-        def test_biz(self):
+        def test_biz(self, barf):
             pass

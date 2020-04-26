@@ -1,4 +1,4 @@
-package com.y4kstudios.imp.testing.pyTestFixtures
+package com.y4kstudios.pytestimp
 
 import com.intellij.codeInsight.completion.*
 import com.intellij.icons.AllIcons

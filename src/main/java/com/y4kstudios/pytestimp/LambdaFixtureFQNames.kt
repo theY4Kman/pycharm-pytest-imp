@@ -1,4 +1,4 @@
-package com.y4kstudios.imp.testing.pyTestFixtures
+package com.y4kstudios.pytestimp
 
 import com.jetbrains.python.nameResolver.FQNamesProvider
 

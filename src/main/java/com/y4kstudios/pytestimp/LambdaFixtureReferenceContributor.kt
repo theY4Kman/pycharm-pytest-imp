@@ -1,4 +1,4 @@
-package com.y4kstudios.imp.testing.pyTestFixtures
+package com.y4kstudios.pytestimp
 
 import com.intellij.openapi.util.Ref
 import com.intellij.patterns.PatternCondition
@@ -59,7 +59,8 @@ object LambdaFixtureTypeProvider : PyTypeProviderBase() {
 private object LambdaFixtureReferenceProvider : PsiReferenceProvider() {
     override fun getReferencesByElement(element: PsiElement, context: ProcessingContext): Array<PsiReference> {
         val namedParam = element as? PyNamedParameter ?: return emptyArray()
-        val fixture = getLambdaFixture(namedParam, TypeEvalContext.codeAnalysis(element.project, element.containingFile)) ?: return emptyArray()
+        val fixture = getLambdaFixture(namedParam, TypeEvalContext.codeAnalysis(element.project, element.containingFile))
+                ?: return emptyArray()
         return arrayOf(LambdaFixtureReference(namedParam, fixture))
     }
 }
@@ -67,7 +68,8 @@ private object LambdaFixtureReferenceProvider : PsiReferenceProvider() {
 private object LambdaFixtureStringReferenceProvider : PsiReferenceProvider() {
     override fun getReferencesByElement(element: PsiElement, context: ProcessingContext): Array<PsiReference> {
         val stringLiteral = element as? PyStringLiteralExpression ?: return emptyArray()
-        val fixture = getLambdaFixture(stringLiteral, TypeEvalContext.codeAnalysis(element.project, element.containingFile)) ?: return emptyArray()
+        val fixture = getLambdaFixture(stringLiteral, TypeEvalContext.codeAnalysis(element.project, element.containingFile))
+                ?: return emptyArray()
         return arrayOf(LambdaFixtureReference(stringLiteral, fixture))
     }
 }
@@ -85,7 +87,7 @@ class LambdaFixtureReferenceContributor : PsiReferenceContributor() {
                                         override fun accepts(call: PyCallExpression, context: ProcessingContext?) = call.isLambdaFixture()
                                     })
                             )),
-            LambdaFixtureStringReferenceProvider,
+                LambdaFixtureStringReferenceProvider,
             PsiReferenceRegistrar.HIGHER_PRIORITY)
     }
 }

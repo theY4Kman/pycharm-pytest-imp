@@ -10,6 +10,8 @@
  
  - [ ] Support lambda fixtures declared in other files
  - [ ] Don't add code sense for lambda fixtures out of scope
- - [ ] Support for lambda fixtures declared in enclosing class
+ - [ ] Don't reference own declaration in `data = lambda_fixture(lambda data: ...)`
+ - [X] Support for lambda fixtures declared in enclosing class
+ - [ ] Support for regular pytest fixtures declared in enclosing class
  
  - [X] Code completion for parameters in lambda fixture `lambda` expressions
