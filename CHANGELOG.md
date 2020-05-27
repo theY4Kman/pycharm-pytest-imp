@@ -13,10 +13,10 @@ EAP versions use X.Y.Z format.
 [To Be Released]
 -------------
 
-_Available since 0.1.0 EAP:_
+_Available since 0.1.3 EAP:_
 
 **Features:**
- - Completion support for pytest_lambda lambda/static fixtures
- - Typing support for pytest_lambda lambda/static fixtures
+ - Completion/typing support for pytest_lambda lambda/static fixtures
+ - Completion/typing support for any pytest fixtures defined in enclosing classes
 
 _To Be Released..._

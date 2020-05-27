@@ -15,3 +15,7 @@
  - [ ] Support for regular pytest fixtures declared in enclosing class
  
  - [X] Code completion for parameters in lambda fixture `lambda` expressions
+
+ - [ ] Add support for pytest-factoryboy model/factory fixtures
+ 
+ - [ ] Implement StringStubIndex for pytest fixtures

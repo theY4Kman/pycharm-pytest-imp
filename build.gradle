@@ -15,9 +15,15 @@ plugins {
 apply plugin: 'kotlin'
 
 group 'com.y4kstudios'
-version '0.1.0'
+version '0.1.3'
 
 sourceCompatibility = 1.8
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
 
 repositories {
     mavenCentral()
@@ -32,22 +38,21 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version 'PY-2020.1'
+    version 'PY-2020.1.1'
     pluginName 'pytest imp'
 
-    plugins=['python', 'PsiViewer:201.6251.22-EAP-SNAPSHOT.3']
+    plugins=['python', 'PsiViewer:201.6251.22-EAP-SNAPSHOT.3', 'com.jetbrains.hackathon.indices.viewer:1.4']
 }
 patchPluginXml {
     changeNotes extractChangeNotes()
     pluginDescription '''
         <p>pytest improvements plugin for PyCharm</p>
+        <p>Improvements include:</p>
+        <ul>
+          <li>Support for pytest-lambda fixtures</li>
+          <li>Proper scoping for pytest fixtures</li>
+        </ul>
     '''
-}
-prepareSandbox {
-    preserve {
-        include 'plugins/psiviewer/**'
-        include 'system/plugins/**'
-    }
 }
 
 // Very primitive changelog extraction code

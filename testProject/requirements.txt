@@ -1,2 +1,3 @@
 pytest-lambda
+pytest-factoryboy
 pytest
