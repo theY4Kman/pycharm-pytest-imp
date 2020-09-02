@@ -26,6 +26,12 @@ class TestStuff:
         a = caret
         b = my_toplevel_static_fixture
 
+    def it_does_things(self, caret):
+        pass
+
+    def how_do_one_do_dis(self, caret):
+        pass
+
 
 l = [1, 2.0, 'c']
 

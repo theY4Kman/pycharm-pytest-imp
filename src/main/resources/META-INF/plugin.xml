@@ -2,7 +2,7 @@
     <id>com.y4kstudios.pytestimp</id>
     <name>pytest imp</name>
     <version>1.0</version>
-    <vendor email="they4kman@gmail.com" url="https://y4k.dev">Y4K Studios</vendor>
+    <vendor email="they4kman@gmail.com" url="https://github.com/they4kman">Y4K Studios</vendor>
 
     <description><![CDATA[
       Improvements to the PyCharm experience, including support for pytest lambda fixtures

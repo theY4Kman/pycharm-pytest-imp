@@ -13,10 +13,17 @@ EAP versions use X.Y.Z format.
 [To Be Released]
 -------------
 
-_Available since 0.1.3 EAP:_
+_Available since 0.2.1 EAP:_
+
+_To Be Released..._
+
+
+0.2, 2020-08-30
+---------------
+
+**Changed:**
+ - Support for PyCharm 2020.2.1
 
 **Features:**
  - Completion/typing support for pytest_lambda lambda/static fixtures
  - Completion/typing support for any pytest fixtures defined in enclosing classes
-
-_To Be Released..._
