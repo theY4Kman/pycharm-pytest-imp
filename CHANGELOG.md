@@ -11,11 +11,20 @@ EAP versions use X.Y.Z format.
 
 
 [To Be Released]
--------------
+----------------
 
-_Available since 0.2.1 EAP:_
+_Available since 0.3.1 EAP:_
 
 _To Be Released..._
+
+
+0.3, 2020-08-30
+---------------
+
+**Features:**
+ - Add run line markers (i.e. "Run pytest for selected_test_method") for classes/methods based on patterns in `pytest.ini`
+ - Configure path to `pytest.ini` in settings (Tools > Python Integrated Tools > py.test)
+ - Support autocompletion / typing / renaming of `precondition_fixture` (from pytest-common-subject)
 
 
 0.2, 2020-08-30

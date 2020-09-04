@@ -1,4 +1,4 @@
-package com.y4kstudios.pytestimp
+package com.y4kstudios.pytestimp.fixtures
 
 import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.psi.PsiElement

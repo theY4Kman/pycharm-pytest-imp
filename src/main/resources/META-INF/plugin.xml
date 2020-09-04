@@ -14,26 +14,38 @@
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="174.0"/>
+    <idea-version since-build="202.5984.4"/>
 
-    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
-         on how to target different products -->
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.python</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <psi.referenceContributor language="Python"
-                                  implementation="com.y4kstudios.pytestimp.LambdaFixtureReferenceContributor"/>
+                                  implementation="com.y4kstudios.pytestimp.fixtures.LambdaFixtureReferenceContributor"/>
         <completion.contributor language="Python"
-                                implementationClass="com.y4kstudios.pytestimp.PyTestParameterCompletionContributor"/>
+                                implementationClass="com.y4kstudios.pytestimp.fixtures.PyTestParameterCompletionContributor"/>
+        <runLineMarkerContributor language="Python"
+                                  implementationClass="com.y4kstudios.pytestimp.runconfigs.PyTestLineMarkerContributor"/>
+        <runConfigurationProducer implementation="com.y4kstudios.pytestimp.runconfigs.PyTestImpConfigurationProducer"/>
+        <projectService serviceImplementation="com.y4kstudios.pytestimp.PyTestImpService"/>
+        <!--suppress PluginXmlCapitalization -->
+        <projectConfigurable instance="com.y4kstudios.pytestimp.PyTestImpSettingsConfigurable"
+                             parentId="com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"
+                             id="com.y4kstudios.pytestimp.PyTestImpSettingsConfigurable"
+                             displayName="py.test"/>
     </extensions>
 
     <extensions defaultExtensionNs="Pythonid">
-        <pyReferenceCustomTargetChecker implementation="com.y4kstudios.pytestimp.LambdaFixtureTargetChecker"/>
-        <inspectionExtension implementation="com.y4kstudios.pytestimp.LambdaFixtureInspectionExtension"/>
-        <typeProvider implementation="com.y4kstudios.pytestimp.LambdaFixtureTypeProvider"/>
+        <pyReferenceCustomTargetChecker implementation="com.y4kstudios.pytestimp.fixtures.LambdaFixtureTargetChecker"/>
+        <inspectionExtension implementation="com.y4kstudios.pytestimp.fixtures.LambdaFixtureInspectionExtension"/>
+        <typeProvider implementation="com.y4kstudios.pytestimp.fixtures.LambdaFixtureTypeProvider"/>
     </extensions>
+
+    <applicationListeners>
+        <listener class="com.y4kstudios.pytestimp.PyTestIniListener"
+                  topic="com.intellij.openapi.vfs.newvfs.BulkFileListener" />
+    </applicationListeners>
 
     <actions>
         <!-- Add your actions here -->

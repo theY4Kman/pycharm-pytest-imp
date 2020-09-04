@@ -1,4 +1,4 @@
-package com.y4kstudios.pytestimp
+package com.y4kstudios.pytestimp.fixtures
 
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleUtilCore
@@ -204,11 +204,12 @@ internal fun PyCallExpression.isAnyLambdaFixture() = NameResolverTools.isCalleeS
         LambdaFixtureFQNames.STATIC_FIXTURE,
         LambdaFixtureFQNames.ERROR_FIXTURE,
         LambdaFixtureFQNames.DISABLED_FIXTURE,
-        LambdaFixtureFQNames.NOT_IMPLEMENTED_FIXTURE
+        LambdaFixtureFQNames.NOT_IMPLEMENTED_FIXTURE,
+        LambdaFixtureFQNames.PRECONDITION_FIXTURE
 )
 
 internal fun getFixtureReferenceType(reference: PsiReference, context: TypeEvalContext): Ref<PyType>? =
-        getFixtureReferenceType(reference, context, null)
+    getFixtureReferenceType(reference, context, null)
 
 internal fun getFixtureReferenceType(reference: PsiReference, context: TypeEvalContext, ignore: PyCallExpression?): Ref<PyType>? {
     val type = when (reference) {

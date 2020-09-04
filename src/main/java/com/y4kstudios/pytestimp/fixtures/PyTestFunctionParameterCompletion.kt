@@ -1,4 +1,4 @@
-package com.y4kstudios.pytestimp
+package com.y4kstudios.pytestimp.fixtures
 
 import com.intellij.codeInsight.completion.*
 import com.intellij.icons.AllIcons
@@ -31,7 +31,7 @@ class PyTestParameterCompletionContributor : CompletionContributor() {
                                             override fun accepts(call: PyCallExpression, context: ProcessingContext?) = call.isLambdaFixture()
                                         })
                                 )),
-                LambdaFixtureReferenceArgumentCompletion)
+            LambdaFixtureReferenceArgumentCompletion)
     }
 
     override fun fillCompletionVariants(parameters: CompletionParameters, result: CompletionResultSet) {

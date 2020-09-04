@@ -29,8 +29,41 @@ class TestStuff:
     def it_does_things(self, caret):
         pass
 
+    def it_does_stuff(self, caret):
+        pass
+
     def how_do_one_do_dis(self, caret):
         pass
+
+
+
+
+
+
+
+
+
+
+class DescribeMe:
+    def its_fantastic(self):
+        assert True
+
+
+class Describeme:
+    def its_fantastic(self):
+        assert True
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 l = [1, 2.0, 'c']
@@ -49,6 +82,9 @@ class TestStuff:
 
     def test_it(self, renaming):
         assert renaming
+
+    def it_tests(self):
+        pass
 
 
 alpha = 24
