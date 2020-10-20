@@ -15,7 +15,7 @@ plugins {
 apply plugin: 'kotlin'
 
 group 'com.y4kstudios'
-version '0.3'
+version '0.3.1'
 
 sourceCompatibility = 1.8
 
@@ -40,10 +40,14 @@ dependencies {
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     type 'PY'
-    version '2020.2.1'
+    version '203.4449.8-EAP-SNAPSHOT'
     pluginName 'pytest imp'
 
-    plugins=['python', 'PsiViewer:202-SNAPSHOT.3', 'com.jetbrains.hackathon.indices.viewer:1.7']
+    plugins=[
+        'python',
+        'PsiViewer:203-SNAPSHOT',
+        'com.jetbrains.hackathon.indices.viewer:1.10',
+    ]
 }
 patchPluginXml {
     changeNotes extractChangeNotes()
@@ -51,8 +55,9 @@ patchPluginXml {
         <p>pytest improvements plugin for PyCharm</p>
         <p>Improvements include:</p>
         <ul>
-          <li>Support for pytest-lambda fixtures</li>
+          <li>Support for custom test method/class naming from pytest.ini</li>
           <li>Proper scoping for pytest fixtures</li>
+          <li>Support for pytest-lambda fixtures</li>
         </ul>
     '''
 }

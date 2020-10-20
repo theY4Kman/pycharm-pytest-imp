@@ -15,6 +15,9 @@ EAP versions use X.Y.Z format.
 
 _Available since 0.3.1 EAP:_
 
+**Changed:**
+ - Support for PyCharm 2020.3 EAP (203.4449.8)
+
 _To Be Released..._
 
 

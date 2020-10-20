@@ -72,8 +72,8 @@ private object LambdaFixtureReferenceArgumentCompletion : CompletionProvider<Com
 
         val usedRefs = HashSet<String>()
         argList.acceptChildren(object : PyElementVisitor() {
-            override fun visitPyStringLiteralExpression(node: PyStringLiteralExpression?) {
-                node?.stringValue?.let { usedRefs.add(it) }
+            override fun visitPyStringLiteralExpression(node: PyStringLiteralExpression) {
+                usedRefs.add(node.stringValue)
             }
         })
 
