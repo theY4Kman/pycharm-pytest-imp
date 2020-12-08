@@ -1,59 +1,80 @@
 package com.y4kstudios.pytestimp
 
 import com.intellij.psi.util.parentOfType
-import com.jetbrains.python.PyNames
-import com.jetbrains.python.fixtures.PyTestCase
 import com.jetbrains.python.psi.PyTypedElement
 import com.jetbrains.python.psi.types.TypeEvalContext
-import com.jetbrains.python.testing.PyTestFrameworkService
-import com.jetbrains.python.testing.TestRunnerService
 import junit.framework.ComparisonFailure
 import org.intellij.lang.annotations.Language
 import org.junit.Test
 
 class LambdaFixtureTypingTest : PyTestTestCase() {
-    private fun doTestStaticFixtureType(@Language("Python") caretDef: String) {
+    private fun doTestStaticFixtureType(@Language("Python") fixtureValue: String,
+                                        @Language("Python") expectedType: String,
+                                        @Language("Python") caretDef: String) {
         @Language("Python")
         val baseFile = """
             import pytest
             from pytest_lambda import static_fixture, lambda_fixture
 
-            my_toplevel_static_fixture = static_fixture(123)
+            my_toplevel_static_fixture = static_fixture(${fixtureValue})
         """
 
         val testFile = "${baseFile.trimIndent()}\n\n${caretDef.trimIndent()}"
-        doTest("int", testFile)
+        doTest(expectedType, testFile)
+    }
+
+    private fun doTestStaticFixtureType_int(@Language("Python") caretDef: String) {
+        doTestStaticFixtureType("123", "int", caretDef)
     }
 
     fun testStaticFixtureTypeFromPytestParam() {
-        doTestStaticFixtureType("""
+        doTestStaticFixtureType_int("""
             @pytest.fixture
             def caret(my_toplevel_<caret>static_fixture):
                 pass
         """)
     }
 
+    fun testStaticFixtureTypeFromPytestParamWithExplicitAnnotation() {
+        doTestStaticFixtureType("123", "str", """
+            @pytest.fixture
+            def caret(my_toplevel_<caret>static_fixture: str):
+                pass
+        """)
+    }
+
     fun testStaticFixtureTypeFromPytestParamLocal() {
-        doTestStaticFixtureType("""
+        doTestStaticFixtureType_int("""
             @pytest.fixture
             def caret(my_toplevel_static_fixture):
                 _ = my_toplevel_<caret>static_fixture
         """)
     }
 
+    fun testStaticFixtureTypeFromPytestParamLocalWithExplicitAnnotation() {
+        doTestStaticFixtureType("123", "str", """
+            @pytest.fixture
+            def caret(my_toplevel_static_fixture: str):
+                _ = my_toplevel_<caret>static_fixture
+        """)
+    }
+
+    @Test(expected = ComparisonFailure::class)
     fun testStaticFixtureTypeFromLambdaParam() {
-        doTestStaticFixtureType("""
+        doTestStaticFixtureType_int( """
             caret = lambda_fixture(lambda my_toplevel_<caret>static_fixture: None)
         """)
     }
 
     fun testStaticFixtureTypeFromLambdaParamLocal() {
-        doTestStaticFixtureType("""
+        doTestStaticFixtureType_int("""
             caret = lambda_fixture(lambda my_toplevel_static_fixture: my_toplevel_<caret>static_fixture)
         """)
     }
 
-    private fun doTestPytestFixtureType(@Language("Python") caretDef: String) {
+    private fun doTestPytestFixtureType(@Language("Python") fixtureValue: String,
+                                        @Language("Python") expectedType: String,
+                                        @Language("Python") caretDef: String) {
         @Language("Python")
         val baseFile = """
             import pytest
@@ -61,42 +82,65 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
 
             @pytest.fixture
             def my_toplevel_pytest_fixture():
-                return 12
+                return ${fixtureValue}
         """
 
         val testFile = "${baseFile.trimIndent()}\n\n${caretDef.trimIndent()}"
-        doTest("int", testFile)
+        doTest(expectedType, testFile)
+    }
+
+    private fun doTestPytestFixtureType_int(@Language("Python") caretDef: String) {
+        doTestPytestFixtureType("345", "int", caretDef)
     }
 
     fun testPytestFixtureTypeFromPytestParam() {
-        doTestPytestFixtureType("""
+        doTestPytestFixtureType_int("""
             @pytest.fixture
             def caret(my_toplevel_<caret>pytest_fixture):
+                pass
+        """)
+    }
+
+    fun testPytestFixtureTypeFromPytestParamWithExplicitAnnotation() {
+        doTestPytestFixtureType("345", "str", """
+            @pytest.fixture
+            def caret(my_toplevel_<caret>pytest_fixture: str):
                 pass
         """)
     }
 
     fun testPytestFixtureTypeFromPytestParamLocal() {
-        doTestPytestFixtureType("""
+        doTestPytestFixtureType_int("""
             @pytest.fixture
             def caret(my_toplevel_pytest_fixture):
                 _ = my_toplevel_<caret>pytest_fixture
         """)
     }
 
+    fun testPytestFixtureTypeFromPytestParamLocalWithExplicitAnnotation() {
+        doTestPytestFixtureType("345", "str", """
+            @pytest.fixture
+            def caret(my_toplevel_pytest_fixture: str):
+                _ = my_toplevel_<caret>pytest_fixture
+        """)
+    }
+
+    @Test(expected = ComparisonFailure::class)
     fun testPytestFixtureTypeFromLambdaParam() {
-        doTestPytestFixtureType("""
+        doTestPytestFixtureType_int("""
             caret = lambda_fixture(lambda my_toplevel_<caret>pytest_fixture: None)
         """)
     }
 
     fun testPytestFixtureTypeFromLambdaParamLocal() {
-        doTestPytestFixtureType("""
+        doTestPytestFixtureType_int("""
             caret = lambda_fixture(lambda my_toplevel_pytest_fixture: my_toplevel_<caret>pytest_fixture)
         """)
     }
 
-    private fun doTestPytestYieldFixtureType(@Language("Python") caretDef: String) {
+    private fun doTestPytestYieldFixtureType(@Language("Python") fixtureValue: String,
+                                             @Language("Python") expectedType: String,
+                                             @Language("Python") caretDef: String) {
         @Language("Python")
         val baseFile = """
             import pytest
@@ -104,131 +148,192 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
 
             @pytest.fixture
             def my_toplevel_pytest_fixture():
-                yield 12
+                yield ${fixtureValue}
         """
 
         val testFile = "${baseFile.trimIndent()}\n\n${caretDef.trimIndent()}"
-        doTest("int", testFile)
+        doTest(expectedType, testFile)
+    }
+
+    private fun doTestPytestYieldFixtureType_int(@Language("Python") caretDef: String) {
+        doTestPytestYieldFixtureType("567", "int", caretDef)
     }
 
     fun testPytestYieldFixtureTypeFromPytestParam() {
-        doTestPytestYieldFixtureType("""
+        doTestPytestYieldFixtureType_int("""
             @pytest.fixture
             def caret(my_toplevel_<caret>pytest_fixture):
                 pass
         """)
     }
 
+    fun testPytestYieldFixtureTypeFromPytestParamWithExplicitAnnotation() {
+        doTestPytestYieldFixtureType("567", "str", """
+            @pytest.fixture
+            def caret(my_toplevel_<caret>pytest_fixture: str):
+                pass
+        """)
+    }
+
     fun testPytestYieldFixtureTypeFromPytestParamLocal() {
-        doTestPytestYieldFixtureType("""
+        doTestPytestYieldFixtureType_int("""
             @pytest.fixture
             def caret(my_toplevel_pytest_fixture):
                 _ = my_toplevel_<caret>pytest_fixture
         """)
     }
 
+    fun testPytestYieldFixtureTypeFromPytestParamLocalWithExplicitAnnotation() {
+        doTestPytestYieldFixtureType("567", "str", """
+            @pytest.fixture
+            def caret(my_toplevel_pytest_fixture: str):
+                _ = my_toplevel_<caret>pytest_fixture
+        """)
+    }
+
+    @Test(expected = ComparisonFailure::class)
     fun testPytestYieldFixtureTypeFromLambdaParam() {
-        doTestPytestYieldFixtureType("""
+        doTestPytestYieldFixtureType_int("""
             caret = lambda_fixture(lambda my_toplevel_<caret>pytest_fixture: None)
         """)
     }
 
     fun testPytestYieldFixtureTypeFromLambdaParamLocal() {
-        doTestPytestYieldFixtureType("""
+        doTestPytestYieldFixtureType_int("""
             caret = lambda_fixture(lambda my_toplevel_pytest_fixture: my_toplevel_<caret>pytest_fixture)
         """)
     }
 
-    private fun doTestLambdaFixtureType(@Language("Python") caretDef: String) {
+    private fun doTestLambdaFixtureType(@Language("Python") fixtureValue: String,
+                                        @Language("Python") expectedType: String,
+                                        @Language("Python") caretDef: String) {
         @Language("Python")
         val baseFile = """
             import pytest
             from pytest_lambda import lambda_fixture
 
-            my_toplevel_lambda_fixture = lambda_fixture(lambda: 123)
+            my_toplevel_lambda_fixture = lambda_fixture(lambda: ${fixtureValue})
         """
 
         val testFile = "${baseFile.trimIndent()}\n\n${caretDef.trimIndent()}"
-        doTest("int", testFile)
+        doTest(expectedType, testFile)
     }
 
-    @Test(expected = ComparisonFailure::class)
+    private fun doTestLambdaFixtureType_int(@Language("Python") caretDef: String) {
+        doTestLambdaFixtureType("789", "int", caretDef)
+    }
+
     fun testLambdaFixtureTypeFromPytestParam() {
-        doTestLambdaFixtureType("""
+        doTestLambdaFixtureType_int("""
             @pytest.fixture
             def caret(my_toplevel_<caret>lambda_fixture):
                 pass
         """)
     }
 
+    fun testLambdaFixtureTypeFromPytestParamWithExplicitAnnotation() {
+        doTestLambdaFixtureType("789", "str","""
+            @pytest.fixture
+            def caret(my_toplevel_<caret>lambda_fixture: str):
+                pass
+        """)
+    }
+
     fun testLambdaFixtureTypeFromPytestParamLocal() {
-        doTestLambdaFixtureType("""
+        doTestLambdaFixtureType_int("""
             @pytest.fixture
             def caret(my_toplevel_lambda_fixture):
+                _ = my_toplevel_<caret>lambda_fixture
+        """)
+    }
+
+    fun testLambdaFixtureTypeFromPytestParamLocalWithExplicitAnnotation() {
+        doTestLambdaFixtureType("789", "str","""
+            @pytest.fixture
+            def caret(my_toplevel_lambda_fixture: str):
                 _ = my_toplevel_<caret>lambda_fixture
         """)
     }
 
     @Test(expected = ComparisonFailure::class)
     fun testLambdaFixtureTypeFromLambdaParam() {
-        doTestLambdaFixtureType("""
+        doTestLambdaFixtureType_int("""
             caret = lambda_fixture(lambda my_toplevel_<caret>lambda_fixture: None)
         """)
     }
 
     fun testLambdaFixtureTypeFromLambdaParamLocal() {
-        doTestLambdaFixtureType("""
+        doTestLambdaFixtureType_int("""
             caret = lambda_fixture(lambda my_toplevel_lambda_fixture: my_toplevel_<caret>lambda_fixture)
         """)
     }
 
-    private fun doTestLambdaParamsFixtureType(@Language("Python") caretDef: String) {
+    private fun doTestLambdaParamsFixtureType(@Language("Python") fixtureValue: String,
+                                              @Language("Python") expectedType: String,
+                                              @Language("Python") caretDef: String) {
         @Language("Python")
         val baseFile = """
             import pytest
             from pytest_lambda import lambda_fixture
 
-            my_toplevel_lambda_fixture = lambda_fixture(params=[
-                1,
-                2.0,
-                'c',
-            ])
+            my_toplevel_lambda_fixture = lambda_fixture(params=${fixtureValue})
         """
 
         val testFile = "${baseFile.trimIndent()}\n\n${caretDef.trimIndent()}"
-        doTest("Union[int, float, str]", testFile)
+        doTest(expectedType, testFile)
+    }
+
+    private fun doTestLambdaParamsFixtureType_Union(@Language("Python") caretDef: String) {
+        doTestLambdaParamsFixtureType("[1, 2.0, 'c']", "Union[int, float, str]", caretDef)
     }
 
     fun testLambdaParamsFixtureTypeFromPytestParam() {
-        doTestLambdaParamsFixtureType("""
+        doTestLambdaParamsFixtureType_Union("""
             @pytest.fixture
             def caret(my_toplevel_<caret>lambda_fixture):
                 pass
         """)
     }
 
+    fun testLambdaParamsFixtureTypeFromPytestParamWithExplicitAnnotation() {
+        doTestLambdaParamsFixtureType("[1, 2.0, 'c']", "str", """
+            @pytest.fixture
+            def caret(my_toplevel_<caret>lambda_fixture: str):
+                pass
+        """)
+    }
+
     fun testLambdaParamsFixtureTypeFromPytestParamLocal() {
-        doTestLambdaParamsFixtureType("""
+        doTestLambdaParamsFixtureType_Union("""
             @pytest.fixture
             def caret(my_toplevel_lambda_fixture):
                 _ = my_toplevel_<caret>lambda_fixture
         """)
     }
 
+    fun testLambdaParamsFixtureTypeFromPytestParamLocalWithExplicitAnnotation() {
+        doTestLambdaParamsFixtureType("[1, 2.0, 'c']", "str", """
+            @pytest.fixture
+            def caret(my_toplevel_lambda_fixture: str):
+                _ = my_toplevel_<caret>lambda_fixture
+        """)
+    }
+
     @Test(expected = ComparisonFailure::class)
     fun testLambdaParamsFixtureTypeFromLambdaParam() {
-        doTestLambdaParamsFixtureType("""
+        doTestLambdaParamsFixtureType_Union("""
             caret = lambda_fixture(lambda my_toplevel_<caret>lambda_fixture: None)
         """)
     }
 
     fun testLambdaParamsFixtureTypeFromLambdaParamLocal() {
-        doTestLambdaParamsFixtureType("""
+        doTestLambdaParamsFixtureType_Union("""
             caret = lambda_fixture(lambda my_toplevel_lambda_fixture: my_toplevel_<caret>lambda_fixture)
         """)
     }
 
-    private fun doTestLambdaPytestParamsFixtureType(@Language("Python") caretDef: String) {
+    private fun doTestLambdaPytestParamsFixtureType(@Language("Python") expectedType: String,
+                                                    @Language("Python") caretDef: String) {
         @Language("Python")
         val baseFile = """
             import pytest
@@ -243,34 +348,54 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
         """
 
         val testFile = "${baseFile.trimIndent()}\n\n${caretDef.trimIndent()}"
-        doTest("Union[int, float, str]", testFile)
+        doTest(expectedType, testFile)
+    }
+
+    private fun doTestLambdaPytestParamsFixtureType_Union(@Language("Python") caretDef: String) {
+        doTestLambdaPytestParamsFixtureType("Union[int, float, str]", caretDef)
     }
 
     fun testLambdaPytestParamsFixtureTypeFromPytestParam() {
-        doTestLambdaPytestParamsFixtureType("""
+        doTestLambdaPytestParamsFixtureType_Union("""
             @pytest.fixture
             def caret(my_toplevel_<caret>lambda_fixture):
                 pass
         """)
     }
 
+    fun testLambdaPytestParamsFixtureTypeFromPytestParamWithExplicitAnnotation() {
+        doTestLambdaPytestParamsFixtureType("int","""
+            @pytest.fixture
+            def caret(my_toplevel_<caret>lambda_fixture: int):
+                pass
+        """)
+    }
+
     fun testLambdaPytestParamsFixtureTypeFromPytestParamLocal() {
-        doTestLambdaPytestParamsFixtureType("""
+        doTestLambdaPytestParamsFixtureType_Union("""
             @pytest.fixture
             def caret(my_toplevel_lambda_fixture):
                 _ = my_toplevel_<caret>lambda_fixture
         """)
     }
 
+    fun testLambdaPytestParamsFixtureTypeFromPytestParamLocalWithExplicitAnnotation() {
+        doTestLambdaPytestParamsFixtureType("int", """
+            @pytest.fixture
+            def caret(my_toplevel_lambda_fixture: int):
+                _ = my_toplevel_<caret>lambda_fixture
+        """)
+    }
+
     @Test(expected = ComparisonFailure::class)
     fun testLambdaPytestParamsFixtureTypeFromLambdaParam() {
-        doTestLambdaPytestParamsFixtureType("""
+        doTestLambdaPytestParamsFixtureType_Union("""
             caret = lambda_fixture(lambda my_toplevel_<caret>lambda_fixture: None)
         """)
     }
 
     fun testLambdaPytestParamsFixtureTypeFromLambdaParamLocal() {
-        doTestLambdaPytestParamsFixtureType("""
+        doTestLambdaPytestParamsFixtureType_Union("""
             caret = lambda_fixture(lambda my_toplevel_lambda_fixture: my_toplevel_<caret>lambda_fixture)
         """)
     }

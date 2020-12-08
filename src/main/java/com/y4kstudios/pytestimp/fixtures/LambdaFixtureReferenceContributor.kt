@@ -101,6 +101,11 @@ object LambdaFixtureTypeProvider : PyTypeProviderBase() {
             return null
         }
 
+        val explicitType = param.getArgumentType(context)
+        if (explicitType != null) {
+            return Ref(explicitType)
+        }
+
         return (
             param.references
                 .firstOrNull { it is LambdaFixtureReference || it is PyTestFixtureReference }
