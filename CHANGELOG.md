@@ -13,12 +13,19 @@ EAP versions use X.Y.Z format.
 [To Be Released]
 ----------------
 
-_Available since 0.3.1 EAP:_
+_Available since 0.3.2 EAP:_
+
+**Fixed:**
+ - Respect explicit type annotations on parameters, rather than inferred type of fixture
+
+_To Be Released..._
+
+
+0.3.1, 2020-10-20
+-----------------
 
 **Changed:**
  - Support for PyCharm 2020.3 EAP (203.4449.8)
-
-_To Be Released..._
 
 
 0.3, 2020-08-30
