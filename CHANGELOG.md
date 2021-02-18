@@ -13,12 +13,24 @@ EAP versions use X.Y.Z format.
 [To Be Released]
 ----------------
 
-_Available since 0.3.2 EAP:_
+_To Be Released..._
+
+
+0.4, 2021-02-17
+---------------
+
+**Features:**
+ - Added support for reading pytest config from pyproject.toml
+
+**Changed:**
+ - Support for PyCharm 2021.1 EAP (211.5538.22)
+
+
+0.3.2, 2020-12-08
+-----------------
 
 **Fixed:**
  - Respect explicit type annotations on parameters, rather than inferred type of fixture
-
-_To Be Released..._
 
 
 0.3.1, 2020-10-20
