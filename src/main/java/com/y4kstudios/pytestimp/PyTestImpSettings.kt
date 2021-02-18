@@ -3,7 +3,6 @@ package com.y4kstudios.pytestimp
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.Comparing
@@ -21,17 +20,20 @@ class PyTestImpSettingsComponent(val project: Project) {
 
     init {
         myPyTestIniPathText.addBrowseFolderListener(
-            "pytest.ini",
-            "Path to pytest.ini:",
+            "Choose py.test Config File",
+            "Path to pytest.ini or pyproject.toml:",
             project,
             FileChooserDescriptor(true, false, false, false, false, false)
-                .withFileFilter { Comparing.equal(it.name, "pytest.ini", SystemInfo.isFileSystemCaseSensitive) }
+                .withFileFilter {
+                    Comparing.equal(it.name, "pytest.ini", SystemInfo.isFileSystemCaseSensitive)
+                        || Comparing.equal(it.name, "pyproject.toml", SystemInfo.isFileSystemCaseSensitive)
+                }
                 .withRoots(ProjectRootManager.getInstance(project).contentRoots.asList())
         )
     }
 
     val panel: JPanel = FormBuilder.createFormBuilder()
-        .addLabeledComponent(JBLabel("Path to pytest.ini: "), myPyTestIniPathText, 1, false)
+        .addLabeledComponent(JBLabel("Path to pytest configuration (pytest.ini or pyproject.toml): "), myPyTestIniPathText, 1, true)
         .addComponentFillVertically(JPanel(), 0)
         .panel
 
@@ -49,7 +51,7 @@ class PyTestImpSettingsConfigurable(val project: Project) : Configurable {
 
     override fun isModified(): Boolean {
         val settings = PyTestImpService.getInstance(project)
-        return settings.pytestIniPath != mySettingsComponent.pyTestIniPathText
+        return settings.pytestConfigPath != mySettingsComponent.pyTestIniPathText
     }
 
     override fun getDisplayName(): String {
@@ -58,15 +60,15 @@ class PyTestImpSettingsConfigurable(val project: Project) : Configurable {
 
     override fun apply() {
         val settings = PyTestImpService.getInstance(project)
-        settings.pytestIniPath = mySettingsComponent.pyTestIniPathText
+        settings.pytestConfigPath = mySettingsComponent.pyTestIniPathText
     }
 
     override fun reset() {
         val settings = PyTestImpService.getInstance(project)
-        mySettingsComponent.pyTestIniPathText = settings.pytestIniPath
+        mySettingsComponent.pyTestIniPathText = settings.pytestConfigPath
     }
 
-    override fun createComponent(): JComponent? {
+    override fun createComponent(): JComponent {
         mySettingsComponent = PyTestImpSettingsComponent(project)
         return mySettingsComponent.panel
     }

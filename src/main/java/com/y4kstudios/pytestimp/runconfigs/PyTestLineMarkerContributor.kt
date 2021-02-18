@@ -36,7 +36,7 @@ object PyTestLineMarkerContributor : RunLineMarkerContributor() {
 
 fun isPytestIniConfiguredTestElement(element: PsiElement): Boolean {
     val service = PyTestImpService.getInstance(element.project)
-    val pytestIni = service.pytestIni ?: return false
+    val pytestIni = service.pytestConfig ?: return false
 
     return when (element) {
         is PyFunction -> element.name?.let { pytestIni.pythonFunctions.matches(it) } ?: false

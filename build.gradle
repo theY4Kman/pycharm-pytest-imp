@@ -35,6 +35,7 @@ repositories {
 }
 
 dependencies {
+    compile 'org.tomlj:tomlj:1.0.0'
     testCompile group: 'junit', name: 'junit', version: '4.12'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
@@ -57,7 +58,7 @@ patchPluginXml {
         <p>pytest improvements plugin for PyCharm</p>
         <p>Improvements include:</p>
         <ul>
-          <li>Support for custom test method/class naming from pytest.ini</li>
+          <li>Support for custom test method/class naming from pytest.ini or pyproject.toml</li>
           <li>Proper scoping for pytest fixtures</li>
           <li>Support for pytest-lambda fixtures</li>
         </ul>

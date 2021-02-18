@@ -12,6 +12,8 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import org.ini4j.Ini
+import org.tomlj.Toml
+import org.tomlj.TomlParseResult
 import java.nio.file.Paths
 
 
@@ -32,28 +34,28 @@ class PyTestImpService(val project: Project) : PersistentStateComponent<PyTestIm
 
     private var myState = State()
 
-    override fun getState(): State? = this.myState
+    override fun getState(): State = this.myState
     override fun loadState(state: State) {
-        pytestIniPath = state.pytestIniPath
+        pytestConfigPath = state.pytestIniPath
     }
 
-    var pytestIniPath: String
+    var pytestConfigPath: String
         get() = myState.pytestIniPath
         set(value) {
             myState.pytestIniPath = value
 
             LocalFileSystem.getInstance().findFileByNioFile(Paths.get(value)).let {
-                refreshPytestIni(it)
+                refreshPytestConfig(it)
             }
         }
 
-    var pytestIni: PyTestIni? = PyTestIni(null)
+    var pytestConfig: PyTestConfig? = PyTestConfig.parse(null)
 
-    fun refreshPytestIni(file: VirtualFile?) {
-        val newPytestIni = PyTestIni(file)
+    fun refreshPytestConfig(file: VirtualFile?) {
+        val newPytestConfig = PyTestConfig.parse(file)
 
-        if (newPytestIni != pytestIni) {
-            pytestIni = newPytestIni
+        if (newPytestConfig != pytestConfig) {
+            pytestConfig = newPytestConfig
 
             // TODO: make more specific
             DaemonCodeAnalyzer.getInstance(project).restart()
@@ -68,21 +70,18 @@ class PyTestImpService(val project: Project) : PersistentStateComponent<PyTestIm
  */
 class PyTestIniListener : BulkFileListener {
     override fun after(events: MutableList<out VFileEvent>) {
-        val pytestInis = PyTestImpService.getAllInstances().groupBy({ it.pytestIniPath }, { it })
+        val pytestConfigs = PyTestImpService.getAllInstances().groupBy({ it.pytestConfigPath }, { it })
 
         events
-            .filter { event -> event.path in pytestInis }
+            .filter { event -> event.path in pytestConfigs }
             .forEach { event ->
                 val file = event.file
-                val services = pytestInis[event.path]
+                val services = pytestConfigs[event.path]
 
-                services!!.forEach { service -> service.refreshPytestIni(file) }
+                services!!.forEach { service -> service.refreshPytestConfig(file) }
             }
     }
 }
-
-
-const val PYTEST_INI_SECTION = "pytest"
 
 
 /**
@@ -111,19 +110,57 @@ fun convertWildcardPatternsToRegex(patterns: String, withDashes: Boolean): Regex
 
 
 /**
+ * Interface for providing access to a pytest config file (pytest.ini file or pyproject.toml section)
+ */
+abstract class PyTestConfig {
+    abstract val pythonClassesRaw: String?
+    abstract val pythonFunctionsRaw: String?
+
+    val pythonClasses: Regex by lazy { convertWildcardPatternsToRegex(pythonClassesRaw ?: "Test*", true) }
+    val pythonFunctions: Regex by lazy { convertWildcardPatternsToRegex(pythonFunctionsRaw ?: "test_*", false) }
+
+    companion object {
+        const val CONFIG_PYTHON_CLASSES = "python_classes"
+        const val CONFIG_PYTHON_FUNCTIONS = "python_functions"
+
+        fun parse(file: VirtualFile?): PyTestConfig? {
+            if (file == null) return null
+
+            return when (file.extension) {
+                "ini" -> PyTestIni(file)
+                "toml" -> PyTestPyProjectToml(file)
+                else -> null
+            }
+        }
+    }
+}
+
+
+/**
  * Parse a pytest.ini file and expose its contents
  */
-class PyTestIni(pytestIniFile: VirtualFile?) {
-    val pytestIni: Ini? by lazy {
-        if (pytestIniFile != null)
-            Ini(pytestIniFile.inputStream)
-        else
-            null
+class PyTestIni(pytestIniFile: VirtualFile): PyTestConfig() {
+    private val pytestIni: Ini by lazy { Ini(pytestIniFile.inputStream) }
+
+    override val pythonClassesRaw: String? by lazy { pytestIni.get(PYTEST_INI_SECTION, CONFIG_PYTHON_CLASSES) }
+    override val pythonFunctionsRaw: String? by lazy { pytestIni.get(PYTEST_INI_SECTION, CONFIG_PYTHON_FUNCTIONS) }
+
+    companion object {
+        const val PYTEST_INI_SECTION = "pytest"
     }
+}
 
-    val pythonClassesRaw: String by lazy { pytestIni?.get(PYTEST_INI_SECTION, "python_classes") ?: "Test*" }
-    val pythonFunctionsRaw: String by lazy { pytestIni?.get(PYTEST_INI_SECTION, "python_functions") ?: "test_*" }
 
-    val pythonClasses: Regex by lazy { convertWildcardPatternsToRegex(pythonClassesRaw, true) }
-    val pythonFunctions: Regex by lazy { convertWildcardPatternsToRegex(pythonFunctionsRaw, false) }
+/**
+ * Parse a pyproject.toml file and expose its tool.pytest.ini_options section
+ */
+class PyTestPyProjectToml(pyprojectTomlFile: VirtualFile): PyTestConfig() {
+    private val pyprojectToml: TomlParseResult by lazy { Toml.parse(pyprojectTomlFile.inputStream) }
+
+    override val pythonClassesRaw: String? by lazy { pyprojectToml.getString("$PYPROJECT_PYTEST_SECTION.$CONFIG_PYTHON_CLASSES") }
+    override val pythonFunctionsRaw: String? by lazy { pyprojectToml.getString("$PYPROJECT_PYTEST_SECTION.$CONFIG_PYTHON_FUNCTIONS") }
+
+    companion object {
+        const val PYPROJECT_PYTEST_SECTION = "tools.pytest.ini_options"
+    }
 }
