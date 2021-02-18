@@ -43,13 +43,12 @@ dependencies {
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     type 'PY'
-    version '203.4449.8-EAP-SNAPSHOT'
+    version '211.5538.22-EAP-SNAPSHOT'
     pluginName 'pytest imp'
 
     plugins=[
         'python',
-        'PsiViewer:203-SNAPSHOT',
-        'com.jetbrains.hackathon.indices.viewer:1.10',
+        'PsiViewer:211-SNAPSHOT',
     ]
 }
 patchPluginXml {
@@ -63,6 +62,8 @@ patchPluginXml {
           <li>Support for pytest-lambda fixtures</li>
         </ul>
     '''
+
+    sinceBuild("203")
 }
 
 publishPlugin {
