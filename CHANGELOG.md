@@ -13,6 +13,9 @@ EAP versions use X.Y.Z format.
 [To Be Released]
 ----------------
 
+**Fixed:**
+ - Use proper name for pytest config in `pyproject.toml` (previously, `tools.pytest.ini_options` was used, instead of `tool.pytest.ini_options`)
+
 _To Be Released..._
 
 

@@ -161,6 +161,6 @@ class PyTestPyProjectToml(pyprojectTomlFile: VirtualFile): PyTestConfig() {
     override val pythonFunctionsRaw: String? by lazy { pyprojectToml.getString("$PYPROJECT_PYTEST_SECTION.$CONFIG_PYTHON_FUNCTIONS") }
 
     companion object {
-        const val PYPROJECT_PYTEST_SECTION = "tools.pytest.ini_options"
+        const val PYPROJECT_PYTEST_SECTION = "tool.pytest.ini_options"
     }
 }

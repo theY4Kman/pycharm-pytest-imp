@@ -1,3 +1,3 @@
-[tools.pytest.ini_options]
-python_functions = "it_* test_*"
-python_classes = "A* Test*"
+[tool.pytest.ini_options]
+python_functions = ""
+python_classes = "A* Test* Describe-*"
