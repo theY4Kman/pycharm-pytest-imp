@@ -16,7 +16,7 @@ plugins {
 apply plugin: 'kotlin'
 
 group 'com.y4kstudios'
-version '0.4'
+version '0.4.1'
 
 sourceCompatibility = 1.8
 
@@ -88,16 +88,9 @@ def extractChangeNotes() {
     def footer = '</ul>\n<p>See also the complete <a href="https://github.com/theY4Kman/pycharm-pytest-imp/blob/master/CHANGELOG.md">changelog</a>.</p>'
 
     def startLine, endLine, skipAfterStart
-
-    if (getVersion().toString().matches("\\d+\\.\\d+\\.\\d+")) {
-        startLine = "_Available since $version"
-        endLine = '_To Be Released..._'
-        skipAfterStart = 0
-    } else {
-        startLine = "$version, "
-        endLine = "----"
-        skipAfterStart = 1
-    }
+    startLine = "$version, "
+    endLine = "----"
+    skipAfterStart = 1
 
     def skipLines = 0
     def changeType = ''
