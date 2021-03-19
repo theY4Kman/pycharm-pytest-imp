@@ -43,12 +43,13 @@ dependencies {
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     type 'PY'
-    version '211.5538.22-EAP-SNAPSHOT'
+    version '211.6085.15-EAP-SNAPSHOT'
     pluginName 'pytest imp'
 
     plugins=[
         'python',
         'PsiViewer:211-SNAPSHOT',
+        'org.toml.lang:0.2.143.3737-211',
     ]
 }
 patchPluginXml {
