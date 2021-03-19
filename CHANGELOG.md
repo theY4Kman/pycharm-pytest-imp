@@ -13,6 +13,9 @@ EAP versions use X.Y.Z format.
 [To Be Released]
 ----------------
 
+**Fixed:**
+ - Properly parse dashes used within character classes of `python_classes` patterns (see GH#9, thanks @WIRUT!)
+
 _To Be Released..._
 
 

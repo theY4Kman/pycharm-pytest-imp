@@ -87,13 +87,91 @@ class PyTestIniListener : BulkFileListener {
 /**
  * Convert an fnmatch/wildcard (e.g. "test_*") pattern to a RegEx pattern string.
  *
+ * NOTE: a handmade parser is used, in order to properly parse CamelCase word
+ *       boundary dashes — a simple string replace would bungle legitimate dashes
+ *       used within character classes ("[A-Z]")
+ *
+ * Heavy inspiration for this parser is derived from:
+ *   https://stackoverflow.com/a/1248627/148585
+ *
  * @param withDashes Whether to treat dashes as CamelCase word boundaries
  */
-fun convertWildcardPatternToRegexPattern(wildcard: String, withDashes: Boolean): String =
-    wildcard.replace("*", ".*").let {
-        if (withDashes) it.replace("-", "[A-Z0-9]")
-        else it
+fun convertWildcardPatternToRegexPattern(wildcard: String, withDashes: Boolean): String {
+    val chars = StringBuilder()
+    var isEscaping = false
+    var charClassLevel = 0
+
+    var i = 0
+    while (i < wildcard.length) {
+        when (val char = wildcard[i]) {
+            '*' -> chars.append(if (charClassLevel > 0) "*" else if (isEscaping) "\\*" else ".*")
+            '?' -> chars.append(if (charClassLevel > 0) "?" else if (isEscaping) "\\?" else ".")
+            '.', '(', ')', '^', '+', '|', '$' -> {
+                if (charClassLevel == 0 || char == '^') {
+                    chars.append("\\")
+                }
+                chars.append(char)
+                isEscaping = false
+            }
+            '\\' -> {
+                isEscaping =
+                    if (isEscaping) {
+                        chars.append("\\")
+                        false
+                    } else {
+                        true
+                    }
+            }
+            '[' -> {
+                if (isEscaping) {
+                    chars.append("\\[")
+                } else {
+                    chars.append('[')
+                    charClassLevel++
+                }
+            }
+            ']' -> {
+                if (isEscaping) {
+                    chars.append("\\]")
+                } else {
+                    chars.append(']')
+                    charClassLevel--
+                }
+            }
+            '!' -> {
+                if (charClassLevel > 0 && wildcard[i - 1] == '[') {
+                    chars.append('^')
+                } else {
+                    chars.append('!')
+                }
+            }
+            '-' -> {
+                if (withDashes && charClassLevel == 0) {
+                    chars.append("[A-Z0-9]")
+                } else {
+                    chars.append('-')
+                }
+            }
+            else -> {
+                chars.append(char)
+                isEscaping = false
+            }
+        }
+
+        i++
     }
+
+    /* Unclosed character classes would result in a PatternSyntaxException.
+     * As a guard against this, we return a pattern matching nothing in cases
+     * of unclosed character classes.
+     */
+    if (charClassLevel > 0) {
+        // "Match nothing" pattern sourced from: https://stackoverflow.com/a/942122/148585
+        return "(?!)"
+    }
+
+    return chars.toString()
+}
 
 /**
  * Convert a space-delimited list of fnmatch/wildcard patterns to a single Regex
