@@ -9,19 +9,18 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.parentOfType
 import com.intellij.util.Processor
 import com.jetbrains.extensions.python.isCalleeName
-import com.jetbrains.python.PyNames
 import com.jetbrains.python.nameResolver.NameResolverTools
 import com.jetbrains.python.psi.*
 import com.jetbrains.python.psi.impl.PyEvaluator
 import com.jetbrains.python.psi.types.*
-import com.jetbrains.python.testing.PyTestFrameworkService
 import com.jetbrains.python.testing.TestRunnerService
+import com.jetbrains.python.testing.getFactoryById
 import com.jetbrains.python.testing.pyTestFixtures.*
 
-private val pyTestName = PyTestFrameworkService.getSdkReadableNameByFramework(PyNames.PY_TEST)
+private val pyTestFactory = getFactoryById("py.test")
 
 internal fun isPyTestEnabled(module: Module) =
-        TestRunnerService.getInstance(module).projectConfiguration == pyTestName
+        TestRunnerService.getInstance(module).selectedFactory == pyTestFactory
 
 private val decoratorNames = arrayOf("pytest.fixture", "fixture")
 

@@ -185,7 +185,7 @@ class PyTestImpConfigurationProducer : AbstractPythonTestConfigurationProducer<P
          * Inspects file relative imports, finds farthest and returns folder with imported file
          */
         private fun getDirectoryForFileToBeImportedFrom(file: PyFile): PsiDirectory? {
-            val maxRelativeLevel = file.fromImports.map { it.relativeLevel }.max() ?: 0
+            val maxRelativeLevel = file.fromImports.map { it.relativeLevel }.maxOrNull() ?: 0
             var elementFolder = file.parent ?: return null
             for (i in 1..maxRelativeLevel) {
                 elementFolder = elementFolder.parent ?: return null

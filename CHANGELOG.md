@@ -15,6 +15,9 @@ EAP versions use X.Y.Z format.
 
 _To Be Released..._
 
+**Changed:**
+ - Support for PyCharm 2021.2 EAP (tested against 212.4321.41)
+
 
 0.4.2, 2021-03-19
 -----------------
