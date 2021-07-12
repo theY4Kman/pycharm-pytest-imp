@@ -174,32 +174,42 @@ fun convertWildcardPatternToRegexPattern(wildcard: String, withDashes: Boolean):
 }
 
 /**
- * Convert a space-delimited list of fnmatch/wildcard patterns to a single Regex
+ * Convert a list of fnmatch/wildcard patterns to a single Regex
  *
  * @param withDashes Whether to treat dashes as CamelCase word boundaries
  */
-fun convertWildcardPatternsToRegex(patterns: String, withDashes: Boolean): Regex =
+fun convertWildcardPatternsToRegex(patterns: List<String>, withDashes: Boolean): Regex =
     patterns
-        .split(Regex(" +"))
         .joinToString("|") {
             convertWildcardPatternToRegexPattern(it, withDashes)
         }
         .let { Regex(it) }
+
+/**
+ * Convert a space-delimited list of fnmatch/wildcard patterns to a single Regex
+ *
+ * @param withDashes Whether to treat dashes as CamelCase word boundaries
+ */
+fun convertWildcardPatternsStringToRegex(patterns: String, withDashes: Boolean): Regex =
+    convertWildcardPatternsToRegex(patterns.split(Regex(" +")), withDashes)
 
 
 /**
  * Interface for providing access to a pytest config file (pytest.ini file or pyproject.toml section)
  */
 abstract class PyTestConfig {
-    abstract val pythonClassesRaw: String?
-    abstract val pythonFunctionsRaw: String?
+    protected open val pythonClassesRaw: String? = null
+    protected open val pythonFunctionsRaw: String? = null
 
-    val pythonClasses: Regex by lazy { convertWildcardPatternsToRegex(pythonClassesRaw ?: "Test*", true) }
-    val pythonFunctions: Regex by lazy { convertWildcardPatternsToRegex(pythonFunctionsRaw ?: "test_*", false) }
+    open val pythonClasses: Regex by lazy { convertWildcardPatternsStringToRegex(pythonClassesRaw ?: DEFAULT_PYTHON_CLASSES, true) }
+    open val pythonFunctions: Regex by lazy { convertWildcardPatternsStringToRegex(pythonFunctionsRaw ?: DEFAULT_PYTHON_FUNCTIONS, false) }
 
     companion object {
         const val CONFIG_PYTHON_CLASSES = "python_classes"
         const val CONFIG_PYTHON_FUNCTIONS = "python_functions"
+
+        const val DEFAULT_PYTHON_CLASSES = "Test*"
+        const val DEFAULT_PYTHON_FUNCTIONS = "test_*"
 
         fun parse(file: VirtualFile?): PyTestConfig? {
             if (file == null) return null
@@ -235,8 +245,26 @@ class PyTestIni(pytestIniFile: VirtualFile): PyTestConfig() {
 class PyTestPyProjectToml(pyprojectTomlFile: VirtualFile): PyTestConfig() {
     private val pyprojectToml: TomlParseResult by lazy { Toml.parse(pyprojectTomlFile.inputStream) }
 
-    override val pythonClassesRaw: String? by lazy { pyprojectToml.getString("$PYPROJECT_PYTEST_SECTION.$CONFIG_PYTHON_CLASSES") }
-    override val pythonFunctionsRaw: String? by lazy { pyprojectToml.getString("$PYPROJECT_PYTEST_SECTION.$CONFIG_PYTHON_FUNCTIONS") }
+    override val pythonClasses: Regex by lazy { parseWildcardPatternsFromToml("$PYPROJECT_PYTEST_SECTION.$CONFIG_PYTHON_CLASSES", DEFAULT_PYTHON_CLASSES, true) }
+    override val pythonFunctions: Regex by lazy { parseWildcardPatternsFromToml("$PYPROJECT_PYTEST_SECTION.$CONFIG_PYTHON_FUNCTIONS", DEFAULT_PYTHON_FUNCTIONS, false) }
+
+    private fun parseWildcardPatternsFromToml(dottedKey: String, defaultPatterns: String, withDashes: Boolean): Regex {
+        return if (pyprojectToml.isArray(dottedKey)) {
+            val patternsArray = pyprojectToml.getArray(dottedKey)!!
+            if (patternsArray.containsStrings()) {
+                convertWildcardPatternsToRegex(patternsArray.toList() as List<String>, withDashes)
+            } else {
+                // In the case of a non-string array (or heterogeneous array), pytest will fail.
+                // We instead simply treat the pattern as unmatchable.
+                // TODO: warn the user about this
+                Regex(".^")
+            }
+        } else if (pyprojectToml.isString(dottedKey)) {
+            convertWildcardPatternsStringToRegex(pyprojectToml.getString(dottedKey)!!, withDashes)
+        } else {
+            convertWildcardPatternsStringToRegex(defaultPatterns, withDashes)
+        }
+    }
 
     companion object {
         const val PYPROJECT_PYTEST_SECTION = "tool.pytest.ini_options"

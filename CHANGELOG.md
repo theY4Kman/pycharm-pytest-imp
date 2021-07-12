@@ -18,6 +18,9 @@ _To Be Released..._
 **Changed:**
  - Support for PyCharm 2021.2 EAP (tested against 212.4321.41)
 
+**Fixed:**
+ - Allow array values for `python_classes` and `python_functions` when using pyproject.toml
+
 
 0.4.2, 2021-03-19
 -----------------
