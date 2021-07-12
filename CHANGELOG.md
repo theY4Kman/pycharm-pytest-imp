@@ -20,6 +20,7 @@ _To Be Released..._
 
 **Fixed:**
  - Allow array values for `python_classes` and `python_functions` when using pyproject.toml
+ - Resolve incorrect typing when using `pytest.param(..., id='xyz')`
 
 
 0.4.2, 2021-03-19

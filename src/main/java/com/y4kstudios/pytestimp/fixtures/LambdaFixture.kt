@@ -239,7 +239,7 @@ internal fun PyCallExpression.getLambdaFixtureType(context: TypeEvalContext): Re
                         // Support pytest.param()
                         if (it is PyCallExpression && it.isCalleeName(PyTestFQNames.PYTEST_PARAM))
                             it.argumentList?.let { argumentList ->
-                                argumentList.arguments.let { arguments ->
+                                argumentList.arguments.filterNot { it is PyKeywordArgument }.let { arguments ->
                                     when (arguments.size) {
                                         // pytest.param('single-value')
                                         1 -> context.getType(arguments[0])

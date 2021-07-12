@@ -343,7 +343,8 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
                 pytest.param(1),
                 pytest.param(2.0),
                 pytest.param('c'),
-                'd',
+                pytest.param('d', id='ddddddd'),
+                'e',
             ])
         """
 
