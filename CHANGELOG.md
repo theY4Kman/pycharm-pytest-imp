@@ -15,6 +15,9 @@ EAP versions use X.Y.Z format.
 
 _To Be Released..._
 
+**Fixed:**
+ - Resolve issue where multiline values caused error in INI config parsing (previously, [ini4j](http://ini4j.sourceforge.net/) was used to parse `pytest.ini`, but Python's [ConfigParser](https://docs.python.org/3/library/configparser.html), which pytest uses, is not a strict implementation of INI parsing; we have switched to using the third-party [java-configparser](https://github.com/ASzc/java-configparser) to resolve this.)
+
 
 0.5, 2021-07-12
 -----------------

@@ -1,5 +1,6 @@
 package com.y4kstudios.pytestimp
 
+import ca.szc.configparser.Ini
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.ServiceManager
@@ -11,9 +12,10 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
-import org.ini4j.Ini
 import org.tomlj.Toml
 import org.tomlj.TomlParseResult
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.nio.file.Paths
 
 
@@ -228,10 +230,10 @@ abstract class PyTestConfig {
  * Parse a pytest.ini file and expose its contents
  */
 class PyTestIni(pytestIniFile: VirtualFile): PyTestConfig() {
-    private val pytestIni: Ini by lazy { Ini(pytestIniFile.inputStream) }
+    private val pytestIni: Ini by lazy { Ini().read(BufferedReader(InputStreamReader(pytestIniFile.inputStream))) }
 
-    override val pythonClassesRaw: String? by lazy { pytestIni.get(PYTEST_INI_SECTION, CONFIG_PYTHON_CLASSES) }
-    override val pythonFunctionsRaw: String? by lazy { pytestIni.get(PYTEST_INI_SECTION, CONFIG_PYTHON_FUNCTIONS) }
+    override val pythonClassesRaw: String? by lazy { pytestIni.getValue(PYTEST_INI_SECTION, CONFIG_PYTHON_CLASSES) }
+    override val pythonFunctionsRaw: String? by lazy { pytestIni.getValue(PYTEST_INI_SECTION, CONFIG_PYTHON_FUNCTIONS) }
 
     companion object {
         const val PYTEST_INI_SECTION = "pytest"
