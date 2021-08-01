@@ -74,7 +74,7 @@ patchPluginXml {
         <ul>
           <li>Support for custom test method/class naming from pytest.ini or pyproject.toml</li>
           <li>Support for pytest-lambda fixtures</li>
-          <li><s>Proper scoping for pytest fixtures</s> <i></i></li>
+          <li>Proper scoping for pytest fixtures</li>
         </ul>
     ''')
 
