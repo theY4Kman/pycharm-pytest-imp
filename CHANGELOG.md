@@ -13,6 +13,9 @@ EAP versions use X.Y.Z format.
 [To Be Released]
 ----------------
 
+**Fixed:**
+ - Resolve error with [java-configparser](https://github.com/ASzc/java-configparser) when either `python_functions` or `python_classes` were undefined when using `pytest.ini` for config.
+
 _To Be Released..._
 
 

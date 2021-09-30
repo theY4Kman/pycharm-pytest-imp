@@ -1,6 +1,8 @@
 package com.y4kstudios.pytestimp
 
 import ca.szc.configparser.Ini
+import ca.szc.configparser.exceptions.NoOptionError
+import ca.szc.configparser.exceptions.NoSectionError
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.ServiceManager
@@ -225,6 +227,16 @@ abstract class PyTestConfig {
     }
 }
 
+internal fun Ini.getValueOrDefault(sectionName: String, optionName: String, default: String?) =
+    try {
+        getValue(sectionName, optionName)
+    } catch (e: Exception) {
+        when (e) {
+            is NoSectionError, is NoOptionError -> default
+            else -> throw e
+        }
+    }
+
 
 /**
  * Parse a pytest.ini file and expose its contents
@@ -232,8 +244,8 @@ abstract class PyTestConfig {
 class PyTestIni(pytestIniFile: VirtualFile): PyTestConfig() {
     private val pytestIni: Ini by lazy { Ini().read(BufferedReader(InputStreamReader(pytestIniFile.inputStream))) }
 
-    override val pythonClassesRaw: String? by lazy { pytestIni.getValue(PYTEST_INI_SECTION, CONFIG_PYTHON_CLASSES) }
-    override val pythonFunctionsRaw: String? by lazy { pytestIni.getValue(PYTEST_INI_SECTION, CONFIG_PYTHON_FUNCTIONS) }
+    override val pythonClassesRaw: String? by lazy { pytestIni.getValueOrDefault(PYTEST_INI_SECTION, CONFIG_PYTHON_CLASSES, null) }
+    override val pythonFunctionsRaw: String? by lazy { pytestIni.getValueOrDefault(PYTEST_INI_SECTION, CONFIG_PYTHON_FUNCTIONS, null) }
 
     companion object {
         const val PYTEST_INI_SECTION = "pytest"
