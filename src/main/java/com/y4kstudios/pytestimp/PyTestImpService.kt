@@ -25,7 +25,7 @@ import java.nio.file.Paths
 class PyTestImpService(val project: Project) : PersistentStateComponent<PyTestImpService.State> {
     companion object {
         fun getInstance(project: Project): PyTestImpService =
-            ServiceManager.getService(project, PyTestImpService::class.java)
+            project.getService(PyTestImpService::class.java)
 
         fun getAllInstances(): List<PyTestImpService> =
             ProjectManager.getInstance().openProjects.map { getInstance(it) }

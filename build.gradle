@@ -1,6 +1,6 @@
 buildscript {
     ext.kotlin_version = '1.4.32'
-    ext.ide_version = '2021.2'
+    ext.ide_version = '213-EAP-SNAPSHOT'
 
     repositories {
         mavenCentral()
@@ -62,8 +62,8 @@ intellij {
 
     plugins.set([
         'python',
-        'PsiViewer:212-SNAPSHOT',
-        'org.toml.lang:0.2.149.3939-212',
+        'PsiViewer:213-SNAPSHOT',
+        'org.toml.lang:213.3714.440',
     ])
 }
 patchPluginXml {
@@ -79,7 +79,7 @@ patchPluginXml {
     ''')
 
     sinceBuild.set("212")
-    untilBuild.set("212.*")
+    untilBuild.set("213.*")
 }
 
 publishPlugin {

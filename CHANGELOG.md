@@ -13,6 +13,9 @@ EAP versions use X.Y.Z format.
 [To Be Released]
 ----------------
 
+**Changed:**
+- Support for PyCharm 2021.3 EAP (tested against 213.3714.452)
+
 **Fixed:**
  - Resolve error with [java-configparser](https://github.com/ASzc/java-configparser) when either `python_functions` or `python_classes` were undefined when using `pytest.ini` for config.
 
