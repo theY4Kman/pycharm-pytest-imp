@@ -10,6 +10,7 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
@@ -48,9 +49,19 @@ class PyTestImpService(val project: Project) : PersistentStateComponent<PyTestIm
         set(value) {
             myState.pytestIniPath = value
 
-            LocalFileSystem.getInstance().findFileByNioFile(Paths.get(value)).let {
-                refreshPytestConfig(it)
-            }
+            val fileSystem = LocalFileSystem.getInstance()
+            val path = Paths.get(value)
+            val file =
+                if (path.isAbsolute) {
+                    fileSystem.findFileByNioFile(path)
+                } else {
+                    ProjectRootManager.getInstance(project)
+                        .contentRoots
+                        .map { root -> root.findFileByRelativePath(path.toString()) }
+                        .firstOrNull()
+                }
+
+            refreshPytestConfig(file)
         }
 
     var pytestConfig: PyTestConfig? = PyTestConfig.parse(null)
