@@ -15,6 +15,10 @@ EAP versions use X.Y.Z format.
 
 _To Be Released..._
 
+
+0.5.3, 2021-11-12
+-----------------
+
 **Fixed:**
  - Allow relative paths to `pytest.ini` or `pyproject.toml` to be used in settings (see [GH#10](https://github.com/theY4Kman/pycharm-pytest-imp/issues/10) — thanks, [kbakk](https://github.com/kbakk)!)
 
