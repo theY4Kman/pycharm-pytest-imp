@@ -63,7 +63,7 @@ intellij {
     plugins.set([
         'python',
         'PsiViewer:213-SNAPSHOT',
-        'org.toml.lang:213.3714.440',
+        'org.toml.lang:213.5605.12',
     ])
 }
 patchPluginXml {
