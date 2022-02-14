@@ -1,6 +1,6 @@
 buildscript {
-    ext.kotlin_version = '1.4.32'
-    ext.ide_version = '213-EAP-SNAPSHOT'
+    project.ext.kotlin_version = '1.5.10'
+    project.ext.ide_version = '221.3427.103-EAP-SNAPSHOT'
 
     repositories {
         mavenCentral()
@@ -15,16 +15,23 @@ plugins {
     id 'org.jetbrains.intellij' version '1.0'
 }
 
+project.ext {
+    source_compatibility = '10'
+    target_compatibility = '11'
+}
+
 apply plugin: 'kotlin'
 
 group 'com.y4kstudios'
 version '0.5.3'
 
-sourceCompatibility = 10
+
+sourceCompatibility = project.ext.source_compatibility
+targetCompatibility = project.ext.target_compatibility
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
-        jvmTarget = 10
+        jvmTarget = project.ext.target_compatibility
     }
 }
 
@@ -62,8 +69,8 @@ intellij {
 
     plugins.set([
         'python',
-        'PsiViewer:213-SNAPSHOT',
-        'org.toml.lang:213.5605.12',
+        'PsiViewer:221-SNAPSHOT',
+        'org.toml.lang:221.3427.87',
     ])
 }
 patchPluginXml {
@@ -79,7 +86,7 @@ patchPluginXml {
     ''')
 
     sinceBuild.set("212")
-    untilBuild.set("213.*")
+    untilBuild.set("221.*")
 }
 
 publishPlugin {
@@ -88,13 +95,18 @@ publishPlugin {
 }
 compileKotlin {
     kotlinOptions {
-        jvmTarget = "10"
+        jvmTarget = project.ext.target_compatibility
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = "10"
+        jvmTarget = project.ext.target_compatibility
     }
+}
+[tasks.runIde, tasks.buildSearchableOptions].each { task ->
+    // Avoid ClassNotFoundException: com.maddyhome.idea.copyright.psi.UpdateCopyrightsProvider
+    // Source: https://github.com/Hannah-Sten/TeXiFy-IDEA/blob/951ffba6029c26e4936d53c781065a7d055a2a8b/build.gradle.kts#L144-L147
+    task.jvmArgs ["-Djava.system.class.loader=com.intellij.util.lang.PathClassLoader"]
 }
 
 // Very primitive changelog extraction code
