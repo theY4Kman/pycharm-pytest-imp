@@ -10,11 +10,15 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+_To Be Released..._
+
+
+0.5.4, 2022-02-14
+-----------------
+
 **Changed:**
  - Support for PyCharm 2022.1 EAP (tested against 221.3427.103)
  - Minimum JVM version changed from 10 to 11
-
-_To Be Released..._
 
 
 0.5.3, 2021-11-12
