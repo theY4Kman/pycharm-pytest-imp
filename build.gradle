@@ -23,7 +23,7 @@ project.ext {
 apply plugin: 'kotlin'
 
 group 'com.y4kstudios'
-version '0.5.4'
+version '0.5.5'
 
 
 sourceCompatibility = project.ext.source_compatibility

@@ -10,10 +10,14 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+_To Be Released..._
+
+
+0.5.5, 2022-02-17
+-----------------
+
 **Fixed:**
  - Resolve `*args` types being reported incorrectly, for any function anywhere (whoops. see [GH#11](https://github.com/theY4Kman/pycharm-pytest-imp/issues/10 — thanks, [andrianovs](https://github.com/andrianovs) and [lancelote](https://github.com/lancelote))
-
-_To Be Released..._
 
 
 0.5.4, 2022-02-14
