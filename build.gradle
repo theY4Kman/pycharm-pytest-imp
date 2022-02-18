@@ -106,7 +106,10 @@ compileTestKotlin {
 [tasks.runIde, tasks.buildSearchableOptions].each { task ->
     // Avoid ClassNotFoundException: com.maddyhome.idea.copyright.psi.UpdateCopyrightsProvider
     // Source: https://github.com/Hannah-Sten/TeXiFy-IDEA/blob/951ffba6029c26e4936d53c781065a7d055a2a8b/build.gradle.kts#L144-L147
-    task.jvmArgs ["-Djava.system.class.loader=com.intellij.util.lang.PathClassLoader"]
+    task.jvmArgs "-Djava.system.class.loader=com.intellij.util.lang.PathClassLoader"
+}
+runIde {
+    jvmArgs "-Didea.ProcessCanceledException=disabled"
 }
 
 // Very primitive changelog extraction code
