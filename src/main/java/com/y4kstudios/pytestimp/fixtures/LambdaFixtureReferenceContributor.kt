@@ -103,7 +103,7 @@ object LambdaFixtureTypeProvider : PyTypeProviderBase() {
 
         val explicitType = param.getArgumentType(context)
         if (explicitType != null) {
-            return Ref(explicitType)
+            return null;
         }
 
         return (
