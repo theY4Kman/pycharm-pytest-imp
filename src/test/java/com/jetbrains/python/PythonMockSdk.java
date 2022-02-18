@@ -34,20 +34,20 @@ public final class PythonMockSdk {
     return create(name, LanguageLevel.getLatest());
   }
 
-  public static @NotNull Sdk create(@NotNull LanguageLevel level, VirtualFile @NotNull ... additionalRoots) {
+  public static @NotNull Sdk create(@NotNull LanguageLevel level, VirtualFile... additionalRoots) {
     return create("MockSdk", level, additionalRoots);
   }
 
-  private static @NotNull Sdk create(@NotNull String name, @NotNull LanguageLevel level, VirtualFile @NotNull ... additionalRoots) {
+  private static @NotNull Sdk create(@NotNull String name, @NotNull LanguageLevel level, VirtualFile... additionalRoots) {
     return create(name, new PyMockSdkType(level), level, additionalRoots);
   }
 
-  public static @NotNull Sdk create(@NotNull String pathSuffix, @NotNull SdkTypeId sdkType, @NotNull LanguageLevel level, VirtualFile @NotNull ... additionalRoots) {
+  public static @NotNull Sdk create(@NotNull String pathSuffix, @NotNull SdkTypeId sdkType, @NotNull LanguageLevel level, VirtualFile... additionalRoots) {
     String sdkName = "Mock " + PyNames.PYTHON_SDK_ID_NAME + " " + level.toPythonVersion();
     return create(sdkName, pathSuffix, sdkType, level, additionalRoots);
   }
 
-  public static @NotNull Sdk create(@NotNull String name, @NotNull String pathSuffix, @NotNull SdkTypeId sdkType, @NotNull LanguageLevel level, VirtualFile @NotNull ... additionalRoots) {
+  public static @NotNull Sdk create(@NotNull String name, @NotNull String pathSuffix, @NotNull SdkTypeId sdkType, @NotNull LanguageLevel level, VirtualFile... additionalRoots) {
     final String mockSdkPath = PythonTestUtil.getTestDataPath() + "/" + pathSuffix;
 
     MultiMap<OrderRootType, VirtualFile> roots = MultiMap.create();

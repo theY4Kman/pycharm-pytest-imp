@@ -62,7 +62,7 @@ public class PyLightProjectDescriptor extends LightProjectDescriptor {
    * @return additional roots to add to mock python
    * @apiNote ignored when name is provided.
    */
-  protected VirtualFile @NotNull [] getAdditionalRoots() {
+  protected VirtualFile[] getAdditionalRoots() {
     return VirtualFile.EMPTY_ARRAY;
   }
 

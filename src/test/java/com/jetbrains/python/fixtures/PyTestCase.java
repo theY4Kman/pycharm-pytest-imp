@@ -129,7 +129,7 @@ public abstract class PyTestCase extends UsefulTestCase {
     initApplication();
     super.setUp();
     IdeaTestFixtureFactory factory = IdeaTestFixtureFactory.getFixtureFactory();
-    TestFixtureBuilder<IdeaProjectTestFixture> fixtureBuilder = factory.createLightFixtureBuilder(getProjectDescriptor());
+    TestFixtureBuilder<IdeaProjectTestFixture> fixtureBuilder = factory.createLightFixtureBuilder(String.valueOf(getProjectDescriptor()));
     final IdeaProjectTestFixture fixture = fixtureBuilder.getFixture();
     myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture, createTempDirFixture());
     myFixture.setTestDataPath(getTestDataPath());
@@ -518,7 +518,7 @@ public abstract class PyTestCase extends UsefulTestCase {
    * Example: "user.n[caret]." There are "name" and "nose" fields.
    * By calling this function with "nose" you will end with "user.nose  ".
    */
-  protected final void completeCaretWithMultipleVariants(final String @NotNull ... desiredVariants) {
+  protected final void completeCaretWithMultipleVariants(final String... desiredVariants) {
     final LookupElement[] lookupElements = myFixture.completeBasic();
     final LookupEx lookup = myFixture.getLookup();
     if (lookupElements != null && lookupElements.length > 1) {
@@ -563,7 +563,7 @@ public abstract class PyTestCase extends UsefulTestCase {
     Disposer.register(myFixture.getProjectDisposable(), () -> PsiTestUtil.removeExcludedRoot(module, dir));
   }
 
-  public <T> void assertContainsInRelativeOrder(@NotNull final Iterable<T> actual, final T @Nullable ... expected) {
+  public <T> void assertContainsInRelativeOrder(@NotNull final Iterable<T> actual, final T... expected) {
     final List<T> actualList = Lists.newArrayList(actual);
     if (expected.length > 0) {
       T prev = expected[0];
