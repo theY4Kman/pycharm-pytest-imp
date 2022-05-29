@@ -52,6 +52,30 @@ class LambdaFixtureCompletionTest : PyTestTestCase() {
         )
     }
 
+    fun testCompleteToplevelFixturesFromLambdaTupleRefParams() {
+        @Language("Python")
+        val testFile = """
+            import pytest
+            from pytest_lambda import lambda_fixture, static_fixture
+
+            @pytest.fixture
+            def my_toplevel_pytest_fixture():
+                pass
+
+            my_toplevel_lambda_fixture = lambda_fixture(lambda: 123)
+            my_toplevel_static_fixture = static_fixture('abc')
+
+            caret = lambda_fixture('my_toplevel_pytest_fixture,<caret>')
+        """.trimIndent()
+
+        doTest(
+            testFile,
+            "my_toplevel_pytest_fixture",
+            "my_toplevel_lambda_fixture",
+            "my_toplevel_static_fixture"
+        )
+    }
+
     fun testCompleteToplevelFixturesFromPytestParams() {
         @Language("Python")
         val testFile = """
