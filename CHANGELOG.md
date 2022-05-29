@@ -12,6 +12,10 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 
 _To Be Released..._
 
+
+0.5.6, 2022-05-29
+-----------------
+
 **Changed:**
  - Support for PyCharm 2022.2 EAP (tested against 222.2270.35)
 
