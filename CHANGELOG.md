@@ -10,13 +10,17 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+_To Be Released..._
+
+
+0.6.0, 2022-06-15
+-----------------
+
 **Features:**
  - Support for async fixtures (both pytest and pytest-lambda fixtures)
 
 **Added:**
  - Expose pretty types for lambda_fixture lambda expression callables
-
-_To Be Released..._
 
 
 0.5.6, 2022-05-29
