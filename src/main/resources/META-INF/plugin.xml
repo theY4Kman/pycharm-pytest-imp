@@ -39,7 +39,7 @@
     <extensions defaultExtensionNs="Pythonid">
         <pyReferenceCustomTargetChecker implementation="com.y4kstudios.pytestimp.fixtures.LambdaFixtureTargetChecker"/>
         <inspectionExtension implementation="com.y4kstudios.pytestimp.fixtures.LambdaFixtureInspectionExtension"/>
-        <typeProvider implementation="com.y4kstudios.pytestimp.fixtures.LambdaFixtureTypeProvider"/>
+        <typeProvider implementation="com.y4kstudios.pytestimp.fixtures.LambdaFixtureTypeProvider" order="first"/>
     </extensions>
 
     <applicationListeners>

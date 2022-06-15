@@ -10,6 +10,9 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+**Features:**
+ - Support for async fixtures (both pytest and pytest-lambda fixtures)
+
 _To Be Released..._
 
 

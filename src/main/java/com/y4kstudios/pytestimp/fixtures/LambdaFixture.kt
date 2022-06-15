@@ -8,14 +8,21 @@ import com.intellij.psi.PsiReference
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.parentOfType
 import com.intellij.util.Processor
+import com.intellij.util.castSafelyTo
 import com.jetbrains.extensions.python.isCalleeName
+import com.jetbrains.python.codeInsight.typing.PyTypingTypeProvider
 import com.jetbrains.python.nameResolver.NameResolverTools
 import com.jetbrains.python.psi.*
 import com.jetbrains.python.psi.impl.PyEvaluator
-import com.jetbrains.python.psi.types.*
+import com.jetbrains.python.psi.types.PyTupleType
+import com.jetbrains.python.psi.types.PyType
+import com.jetbrains.python.psi.types.PyUnionType
+import com.jetbrains.python.psi.types.TypeEvalContext
 import com.jetbrains.python.testing.TestRunnerService
 import com.jetbrains.python.testing.getFactoryById
-import com.jetbrains.python.testing.pyTestFixtures.*
+import com.jetbrains.python.testing.pyTestFixtures.PyTestFixture
+import com.jetbrains.python.testing.pyTestFixtures.PyTestFixtureReference
+import com.jetbrains.python.testing.pyTestFixtures.findDecoratorsByName
 
 private val pyTestFactory = getFactoryById("py.test")
 
@@ -194,6 +201,7 @@ internal fun PyTargetExpression.getStaticFixtureValue(): PyExpression? {
 
 internal fun PyCallExpression.isLambdaFixture() = NameResolverTools.isCalleeShortCut(this, LambdaFixtureFQNames.LAMBDA_FIXTURE)
 internal fun PyCallExpression.getLambdaFunction() = this.getArgument(0, PyLambdaExpression::class.java)
+internal fun PyCallExpression.isLambdaFixtureAsync() = this.getKeywordArgument("async_")?.castSafelyTo<PyBoolLiteralExpression>()?.value ?: false
 
 internal fun PyCallExpression.isStaticFixture() = NameResolverTools.isCalleeShortCut(this, LambdaFixtureFQNames.STATIC_FIXTURE)
 internal fun PyCallExpression.getStaticFixtureValue(): PyExpression? = this.getArgument(0, PyExpression::class.java)
@@ -204,6 +212,13 @@ internal fun PyCallExpression.isAnyLambdaFixture() = NameResolverTools.isCalleeS
         LambdaFixtureFQNames.ERROR_FIXTURE,
         LambdaFixtureFQNames.DISABLED_FIXTURE,
         LambdaFixtureFQNames.NOT_IMPLEMENTED_FIXTURE,
+        LambdaFixtureFQNames.PRECONDITION_FIXTURE
+)
+
+/** Lambda fixtures that accept lambda functions (which may request other fixtures) */
+internal fun PyCallExpression.isDynamicLambdaFixture() = NameResolverTools.isCalleeShortCut(this,
+        LambdaFixtureFQNames.LAMBDA_FIXTURE,
+        LambdaFixtureFQNames.ERROR_FIXTURE,
         LambdaFixtureFQNames.PRECONDITION_FIXTURE
 )
 
@@ -227,6 +242,12 @@ internal fun PyCallExpression.getLambdaFixtureType(context: TypeEvalContext): Re
         val lambda = this.getLambdaFunction()
         if (lambda != null) {
             val returnType = context.getReturnType(lambda)
+
+            // If an async fixture evaluates to an awaitable, use its wrapped type
+            if (this.isLambdaFixtureAsync() && returnType != null) {
+                PyTypingTypeProvider.coroutineOrGeneratorElementType(returnType)?.let { return it }
+            }
+
             return Ref(returnType);
         }
 

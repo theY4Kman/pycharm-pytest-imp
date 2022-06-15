@@ -75,6 +75,10 @@ class LambdaFixtureReference(expression: PyExpression, fixture: PyTestFixture) :
 internal fun PyTestFixtureReference.getType(context: TypeEvalContext): PyType? =
     getFunction()?.let { func ->
         val returnType = context.getReturnType(func)
+
+        // Unwrap awaitable types, for async fixture support
+        PyTypingTypeProvider.coroutineOrGeneratorElementType(returnType)?.let { return it.get() }
+
         return if (!func.isGenerator) {
             returnType
         } else {
@@ -110,7 +114,7 @@ object LambdaFixtureTypeProvider : PyTypeProviderBase() {
             param.references
                 .firstOrNull { it is LambdaFixtureReference || it is PyTestFixtureReference }
                 ?.let { getFixtureReferenceType(it, context) }
-            )
+        )
     }
 
     override fun getReferenceType(referenceTarget: PsiElement, context: TypeEvalContext, anchor: PsiElement?): Ref<PyType>? {

@@ -1,3 +1,5 @@
+import asyncio
+
 import pytest
 from pytest_lambda import lambda_fixture, static_fixture, error_fixture, disabled_fixture, not_implemented_fixture
 
@@ -7,6 +9,8 @@ butt = lambda_fixture('lamb')
 
 faux = lambda_fixture(lambda real: real)
 refaux = lambda_fixture('real')
+
+asink = lambda_fixture(lambda: asyncio.sleep(0, 'test'), async_=True)
 
 # stat = static_fixture(24)
 
@@ -22,10 +26,20 @@ def real():
     return 36
 
 
-def test_stuff(ref, butt, faux, real):
+@pytest.fixture
+async def a_real_sink():
+    return 48
+
+
+ref_sinks = lambda_fixture(lambda asink, a_real_sink: (asink, a_real_sink))
+
+
+def test_stuff(ref, butt, faux, real, asink, a_real_sink):
     a = faux
     b = butt
     c = real
+    d = asink
+    e = a_real_sink
 
 
 stat = static_fixture(86)
@@ -42,7 +56,7 @@ class TestThings:
     def stuff(self):
         return 'butts'
 
-    def test_shit(self, real, refaux, stuff):
+    def test_shit(self, real, refaux, stuff, asink, a_real_sink):
         pass
 
     class TestSub:
