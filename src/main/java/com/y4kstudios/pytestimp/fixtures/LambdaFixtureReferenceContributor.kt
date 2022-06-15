@@ -32,7 +32,7 @@ class LambdaFixtureReference(expression: PyExpression, fixture: PyTestFixture) :
             return myElement.replace(PyElementGenerator.getInstance(myElement.project).createParameter(newElementName))!!
         }
         if (myElement is PyStringLiteralExpression) {
-            return myElement.replace(PyElementGenerator.getInstance(myElement.project).createStringLiteral(myElement, newElementName))!!
+            return myElement.replace(PyElementGenerator.getInstance(myElement.project).createStringLiteral(myElement as PyStringLiteralExpression, newElementName))!!
         }
 
         return super.handleElementRename(newElementName)

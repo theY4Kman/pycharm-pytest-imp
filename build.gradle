@@ -1,5 +1,5 @@
 buildscript {
-    project.ext.kotlin_version = '1.5.10'
+    project.ext.kotlin_version = '1.7.0'
     project.ext.ide_version = '222-EAP-SNAPSHOT'
 
     repositories {
@@ -81,7 +81,7 @@ intellij {
     plugins.set([
         'python',
         'PsiViewer:222-SNAPSHOT',
-        'org.toml.lang:222.2270.19',
+        'org.toml.lang:222.2889.12',
     ])
 
     patchPluginXml {
