@@ -124,6 +124,29 @@ object LambdaFixtureTypeProvider : PyTypeProviderBase() {
         val callable = paramList.containingCallable ?: return null
         return getParameterType(referenceTarget, callable, context)
     }
+
+    /** Expose pretty types for lambda_fixture lambda expression callables */
+    override fun getCallableType(callable: PyCallable, context: TypeEvalContext): PyType? {
+        if (callable !is PyLambdaExpression) return null;
+
+        val call = callable.parentOfType<PyCallExpression>() ?: return null
+        if (!call.isAnyLambdaFixture()) return null;
+
+        val callableParams =
+            callable.parameterList.parameters
+                .map { param ->
+                    PyCallableParameterImpl.psi(
+                        param,
+                        param.references
+                            .firstOrNull { it is LambdaFixtureReference || it is PyTestFixtureReference }
+                            ?.let { getFixtureReferenceType(it, context) }
+                            ?.get()
+                    )
+                }
+                .toList()
+
+        return PyFunctionTypeImpl(callable, callableParams)
+    }
 }
 
 class LambdaFixtureReferenceContributor : PsiReferenceContributor() {
