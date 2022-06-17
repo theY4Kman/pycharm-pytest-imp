@@ -1,3 +1,6 @@
 [tool.pytest.ini_options]
 python_functions = ""
 python_classes = "A* Test* Describe-*"
+addopts = [
+    "-p", "tests.plugins.pluggo"
+]

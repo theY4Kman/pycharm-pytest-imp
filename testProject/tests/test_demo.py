@@ -21,7 +21,7 @@ a = lambda_fixture(lambda : 123)
 class TestStuff:
     caret = lambda_fixture('caret')
     
-    def test_it(self, caret, my_toplevel_static_fixture):
+    def test_it(self, caret, my_toplevel_static_fixture, ):
         assert caret
         a = caret
         b = my_toplevel_static_fixture
@@ -45,7 +45,7 @@ class TestStuff:
 
 
 class DescribeMe:
-    def its_fantastic(self):
+    def its_fantastic(self, la):
         assert True
 
 

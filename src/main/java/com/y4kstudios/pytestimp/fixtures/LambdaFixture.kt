@@ -1,11 +1,16 @@
 package com.y4kstudios.pytestimp.fixtures
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.openapi.util.Ref
+import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiReference
 import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.psi.util.QualifiedName
 import com.intellij.psi.util.parentOfType
 import com.intellij.util.Processor
 import com.intellij.util.castSafelyTo
@@ -18,11 +23,13 @@ import com.jetbrains.python.psi.types.PyTupleType
 import com.jetbrains.python.psi.types.PyType
 import com.jetbrains.python.psi.types.PyUnionType
 import com.jetbrains.python.psi.types.TypeEvalContext
+import com.jetbrains.python.sdk.rootManager
 import com.jetbrains.python.testing.TestRunnerService
 import com.jetbrains.python.testing.getFactoryById
 import com.jetbrains.python.testing.pyTestFixtures.PyTestFixture
 import com.jetbrains.python.testing.pyTestFixtures.PyTestFixtureReference
-import com.jetbrains.python.testing.pyTestFixtures.findDecoratorsByName
+import com.y4kstudios.pytestimp.PyTestImpService
+import com.y4kstudios.pytestimp.PytestLoadPlugin
 
 private val pyTestFactory = getFactoryById("py.test")
 
@@ -37,9 +44,6 @@ private val PyFunction.asFixture: PyTestFixture?
 private fun PyDecoratorList.hasDecorator(vararg names: String) = names.any { findDecorator(it) != null }
 
 internal fun PyFunction.isFixture() = decoratorList?.hasDecorator(*decoratorNames) ?: false
-internal fun PyCallable.isFixture() =
-        this.asMethod()?.isFixture() ?: false
-                || PsiTreeUtil.getParentOfType(this, PyCallExpression::class.java)?.isLambdaFixture() ?: false
 
 internal fun PyTestFixture.isLambdaFixture(): Boolean = this.resolveTarget is PyTargetExpression
 
@@ -52,10 +56,6 @@ internal fun getFixture(element: PyNamedParameter, typeEvalContext: TypeEvalCont
     return getFixture(element.name, func, typeEvalContext)
 }
 
-internal fun getFixture(element: PyStringLiteralExpression, typeEvalContext: TypeEvalContext): PyTestFixture? {
-    return getFixture(element.stringValue, element, typeEvalContext)
-}
-
 internal fun getFixture(name: String?, source: PsiElement, typeEvalContext: TypeEvalContext): PyTestFixture? {
     return getFixtures(source, typeEvalContext).firstOrNull { o -> o.name == name }
 }
@@ -65,74 +65,31 @@ internal fun getFixtures(source: PsiElement, typeEvalContext: TypeEvalContext): 
     return getFixtures(module, source, typeEvalContext)
 }
 
-
-/**
- * Gets list of fixtures suitable for certain function.
- *
- * [forWhat] function that you want to use fixtures with. Could be test or fixture itself.
- *
- * @return all pytest fixtures in project that could be used by [forWhat]
- */
-internal fun getLambdaFixtures(module: Module, forWhat: PyCallable, typeEvalContext: TypeEvalContext): List<PyTestFixture> {
-    // Fixtures could be used only by test functions or other fixtures.
-    if (!(isPyTestEnabled(module) || forWhat.isFixture())) {
-        return emptyList()
-    }
-
-    val selfName = if (forWhat is PyFunction) forWhat.name else PsiTreeUtil.getParentOfType(forWhat, PyTargetExpression::class.java)?.name
-    return getLambdaFixtures(forWhat as PsiElement, typeEvalContext).filter { it.name != selfName }
-}
-
-internal fun getLambdaFixtures(forWhat: PsiElement, typeEvalContext: TypeEvalContext): List<PyTestFixture> {
-    val topLevelFixtures =
-            ((forWhat.containingFile as? PyFile)?.topLevelAttributes ?: emptyList())
-                    .mapNotNull { it.asFixture }
-                    .toList()
-
-    // Class fixtures can't be used for top level functions
-    val forWhatClass = PsiTreeUtil.getParentOfType(forWhat, PyClass::class.java) ?: return topLevelFixtures
-
-    val classBasedFixtures = mutableListOf<PyTestFixture>()
-    forWhatClass.visitNestingClassAttributes(
-            Processor { target ->
-            target?.asFixture?.let { classBasedFixtures.add(it) }
-            true
-        },
-        typeEvalContext
-    )
-    return classBasedFixtures + topLevelFixtures
-}
-
-internal fun getOnlyNestingRegularFixtures(forWhat: PsiElement, typeEvalContext: TypeEvalContext): List<PyTestFixture> {
-    // Class fixtures can't be used for top level functions
-    val forWhatClass = PsiTreeUtil.getParentOfType(forWhat, PyClass::class.java)
-            ?: return emptyList()
-
-    val classBasedFixtures = mutableListOf<PyTestFixture>()
-    forWhatClass.visitNestingMethods(Processor { func ->
-        func.asFixture?.let { classBasedFixtures.add(it) }
-        true
-    }, false, typeEvalContext)
-    return classBasedFixtures
-}
-
 internal fun getFixtures(module: Module, forWhat: PsiElement, context: TypeEvalContext): List<PyTestFixture> {
     val forWhatFile = forWhat.containingFile?.originalFile
+    val fixtureFiles = listOf(forWhatFile) + getContributingPluginFiles(forWhatFile)
 
     val topLevelFixtures =
-            (findDecoratorsByName(module, *decoratorNames)
-                    .filter { it.target?.containingClass == null } //We need only top-level functions, class-based fixtures processed above
-                    .filter {  it.target?.containingFile == forWhatFile }
-                    .mapNotNull { createFixture(it) }
-             + ((forWhat.containingFile as? PyFile)?.topLevelAttributes ?: emptyList())
-                    .mapNotNull { it.asFixture }
-            ).toList()
+        fixtureFiles
+            .mapNotNull { it as? PyFile }
+            .flatMap { it.iterateNames() }
+            .mapNotNull {
+                when (it) {
+                    is PyTargetExpression -> it.asFixture
+                    is PyFunction -> {
+                        it.decoratorList?.decorators
+                            ?.firstOrNull { decorator -> decorator.qualifiedName?.toString() in decoratorNames }
+                            ?.let { decorator -> createFixture(decorator) }
+                    }
+                    else -> null
+                }
+            }
 
     // Class fixtures can't be used for top level functions
     val forWhatClass = PsiTreeUtil.getParentOfType(forWhat, PyClass::class.java) ?: return topLevelFixtures
 
     val classBasedFixtures = mutableListOf<PyTestFixture>()
-    forWhatClass.visitNestingClasses(Processor { pyClass ->
+    forWhatClass.visitNestingClasses { pyClass ->
         // Get self/nesting class lambda fixtures
         pyClass.visitClassAttributes({ target ->
             target?.asFixture?.let { classBasedFixtures.add(it) }
@@ -144,8 +101,91 @@ internal fun getFixtures(module: Module, forWhat: PsiElement, context: TypeEvalC
             func.asFixture?.let { classBasedFixtures.add(it) }
             true
         }, true, context)
-    })
+    }
     return classBasedFixtures + topLevelFixtures
+}
+
+/**
+ * Find a pytest `configfile` in the directory
+ *
+ * See https://docs.pytest.org/en/stable/reference/customize.html#finding-the-rootdir
+ */
+internal fun findConfigFileInDir(dir: PsiDirectory): PsiFile? =
+    // TODO(zk): enforce add'l constraints for pyproject.toml, tox.ini, and setup.cfg
+    listOf("pytest.ini",  "pyproject.toml", "tox.ini", "setup.cfg")
+        .firstNotNullOfOrNull { filename -> dir.findFile(filename) }
+
+internal fun getContributingPluginFiles(fromFile: PsiFile?): List<PsiFile> {
+    if (fromFile == null) return emptyList()
+
+    val containingModule = ModuleUtil.findModuleForFile(fromFile) ?: return emptyList()
+    val contentRoots = containingModule.rootManager.contentRoots
+    val pluginFiles = ArrayList<PsiFile>()
+
+    // Add all conftest.py files up the chain, until pytest rootdir is found
+    //  See also https://docs.pytest.org/en/stable/reference/customize.html#finding-the-rootdir
+    var curDir = fromFile.containingDirectory
+    var topLevelConftest: PsiFile? = null
+    while (true) {
+        val conftest = curDir.findFile("conftest.py")
+        if (conftest != null) {
+            pluginFiles.add(conftest)
+            topLevelConftest = conftest
+        }
+
+        if (curDir.virtualFile in contentRoots || findConfigFileInDir(curDir) != null) {
+            break
+        }
+
+        curDir = curDir.parentDirectory
+    }
+
+    val extraPlugins = ArrayList<PytestLoadPlugin>()
+
+    // If root conftest contains a pytest_plugins decl, also add those referenced modules
+    topLevelConftest
+        ?.castSafelyTo<PyFile>()
+        ?.findTopLevelAttribute("pytest_plugins")
+        ?.findAssignedValue()
+        ?.castSafelyTo<PySequenceExpression>()
+        ?.elements?.mapNotNull { it.castSafelyTo<PyStringLiteralExpression>()?.stringValue }?.map { PytestLoadPlugin(it) }
+        ?.toCollection(extraPlugins)
+
+    // Add any plugins loaded explicitly from pytest config
+    val project = fromFile.project
+    val pytestImpService = project.service<PyTestImpService>()
+    val pytestConfig = pytestImpService.pytestConfig
+    if (pytestConfig != null) {
+        extraPlugins.addAll(pytestConfig.loadedPlugins)
+    }
+
+    if (extraPlugins.isNotEmpty()) {
+        val pyPsiFacade = fromFile.project.service<PyPsiFacade>()
+        val resolveCtx = pyPsiFacade.createResolveContextFromFoothold(curDir)
+
+        extraPlugins
+            // TODO(zk): handle excluded plugins
+            .asSequence()
+            .filter { !it.excluded }
+            .mapNotNull { plugin ->
+                // plugin decls can be a full dotted path, or shorthand of `pytest_<name>`
+                val candidates = arrayListOf(plugin.name)
+                if ("." !in plugin.name) candidates.add("pytest_${plugin.name}")
+
+                candidates
+                    .map { QualifiedName.fromDottedString(it) }
+                    .firstNotNullOfOrNull { qn ->
+                        pyPsiFacade.resolveQualifiedName(qn, resolveCtx).getOrNull(0)
+                    }
+            }
+            .mapNotNull { PyUtil.turnDirIntoInit(it) }
+            .filterIsInstance<PyFile>()
+            .toCollection(pluginFiles)
+    }
+
+    // TODO: Check for any pytest plugins within sdk
+
+    return pluginFiles
 }
 
 internal fun PyClass.visitNestingClasses(processor: Processor<PyClass>) =

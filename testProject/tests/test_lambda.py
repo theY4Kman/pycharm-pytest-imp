@@ -34,7 +34,7 @@ async def a_real_sink():
 ref_sinks = lambda_fixture(lambda asink, a_real_sink: (asink, a_real_sink))
 
 
-def test_stuff(ref, butt, faux, real, asink, a_real_sink):
+def test_stuff(ref, butt, faux, real, asink, a_real_sink, ):
     a = faux
     b = butt
     c = real
