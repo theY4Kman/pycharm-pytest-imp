@@ -10,10 +10,14 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+_To Be Released..._
+
+
+0.7.0, 2022-06-17
+-----------------
+
 **Features:**
  - Add completion/references for external lambda fixtures (from appropriate `conftest.py` files, and from plugins listed in the root conftest's `pytest_plugins` and from `-p <plugin>` arguments in the pytest config's `addopts`)
-
-_To Be Released..._
 
 
 0.6.0, 2022-06-15
