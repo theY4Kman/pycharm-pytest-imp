@@ -10,6 +10,9 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+**Fixed:**
+ - Resolved artifact build including test sources, some of which caused plugin incompatibilities when scanned.
+
 _To Be Released..._
 
 

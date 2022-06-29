@@ -26,9 +26,6 @@ group 'com.y4kstudios'
 version '0.7.0'
 
 
-sourceCompatibility = project.ext.source_compatibility
-targetCompatibility = project.ext.target_compatibility
-
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
         jvmTarget = project.ext.target_compatibility
@@ -63,13 +60,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
     testCompile group: 'junit', name: 'junit', version: '4.13.1'
-}
-
-configurations.all {
-    resolutionStrategy.dependencySubstitution {
-        // NOTE: release-380 appears to have been removed from the repo
-        substitute module('org.jetbrains.kotlin:kotlin-reflect:1.4.32-release-380') using module("org.jetbrains.kotlin:kotlin-reflect:1.4.32")
-    }
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
@@ -123,6 +113,10 @@ compileTestKotlin {
 }
 runIde {
     jvmArgs "-Didea.ProcessCanceledException=disabled"
+}
+
+jar {
+    exclude('com/jetbrains/**')
 }
 
 // Very primitive changelog extraction code
