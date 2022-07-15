@@ -10,6 +10,9 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+**Fixed:**
+ - Resolved null pointer exception related to pytest plugin/conftest fixtures search, which could impact code sense for completely unrelated files.
+
 _To Be Released..._
 
 

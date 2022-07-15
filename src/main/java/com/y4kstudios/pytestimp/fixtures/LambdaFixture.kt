@@ -105,6 +105,19 @@ internal fun getFixtures(module: Module, forWhat: PsiElement, context: TypeEvalC
     return classBasedFixtures + topLevelFixtures
 }
 
+internal fun isTestFile(element: PsiElement?): Boolean {
+    if (element == null) return false
+
+    val containingFile = element.containingFile?.virtualFile ?: return false
+
+    val project = element.project
+    val pytestImpService = project.service<PyTestImpService>()
+    val pytestConfig = pytestImpService.pytestConfig ?: return false
+
+    val containingFileName = containingFile.name
+    return pytestConfig.pythonFiles.matches(containingFileName)
+}
+
 /**
  * Find a pytest `configfile` in the directory
  *
@@ -124,7 +137,7 @@ internal fun getContributingPluginFiles(fromFile: PsiFile?): List<PsiFile> {
 
     // Add all conftest.py files up the chain, until pytest rootdir is found
     //  See also https://docs.pytest.org/en/stable/reference/customize.html#finding-the-rootdir
-    var curDir = fromFile.containingDirectory
+    var curDir = fromFile.containingDirectory ?: return emptyList()
     var topLevelConftest: PsiFile? = null
     while (true) {
         val conftest = curDir.findFile("conftest.py")
@@ -137,7 +150,7 @@ internal fun getContributingPluginFiles(fromFile: PsiFile?): List<PsiFile> {
             break
         }
 
-        curDir = curDir.parentDirectory
+        curDir = curDir.parentDirectory ?: break
     }
 
     val extraPlugins = ArrayList<PytestLoadPlugin>()

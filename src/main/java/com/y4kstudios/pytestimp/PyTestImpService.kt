@@ -225,9 +225,11 @@ data class PytestLoadPlugin(
 abstract class PyTestConfig(val project: Project) {
     protected open val pythonClassesRaw: String? = null
     protected open val pythonFunctionsRaw: String? = null
+    protected open val pythonFilesRaw: String? = null
 
     open val pythonClasses: Regex by lazy { convertWildcardPatternsStringToRegex(pythonClassesRaw ?: DEFAULT_PYTHON_CLASSES, true) }
     open val pythonFunctions: Regex by lazy { convertWildcardPatternsStringToRegex(pythonFunctionsRaw ?: DEFAULT_PYTHON_FUNCTIONS, false) }
+    open val pythonFiles: Regex by lazy { convertWildcardPatternsStringToRegex(pythonFilesRaw ?: DEFAULT_PYTHON_FILES, false) }
 
     /** Split/shlex'd extra py.test command-line options, from config's `addopts` */
     open val cmdlineOpts: List<String> = emptyList()
@@ -262,10 +264,12 @@ abstract class PyTestConfig(val project: Project) {
     companion object {
         const val CONFIG_PYTHON_CLASSES = "python_classes"
         const val CONFIG_PYTHON_FUNCTIONS = "python_functions"
+        const val CONFIG_PYTHON_FILES = "python_files"
         const val CONFIG_ADDOPTS = "addopts"
 
         const val DEFAULT_PYTHON_CLASSES = "Test*"
         const val DEFAULT_PYTHON_FUNCTIONS = "test_*"
+        const val DEFAULT_PYTHON_FILES = "test_*.py *_test.py"
 
         fun parse(file: VirtualFile?, project: Project): PyTestConfig? {
             if (file == null) return null
@@ -298,6 +302,7 @@ class PyTestIni(pytestIniFile: VirtualFile, project: Project): PyTestConfig(proj
 
     override val pythonClassesRaw: String? by lazy { pytestIni.getValueOrDefault(PYTEST_INI_SECTION, CONFIG_PYTHON_CLASSES, null) }
     override val pythonFunctionsRaw: String? by lazy { pytestIni.getValueOrDefault(PYTEST_INI_SECTION, CONFIG_PYTHON_FUNCTIONS, null) }
+    override val pythonFilesRaw: String? by lazy { pytestIni.getValueOrDefault(PYTEST_INI_SECTION, CONFIG_PYTHON_FILES, null) }
 
     override val cmdlineString: String by lazy { pytestIni.getValueOrDefault(PYTEST_INI_SECTION, CONFIG_ADDOPTS, null) ?: "" }
     override val cmdlineOpts: List<String> by lazy { ParametersListUtil.parse(cmdlineString, false, true) }
@@ -316,6 +321,7 @@ class PyTestPyProjectToml(pyprojectTomlFile: VirtualFile, project: Project): PyT
 
     override val pythonClasses: Regex by lazy { parseWildcardPatternsFromToml("$PYPROJECT_PYTEST_SECTION.$CONFIG_PYTHON_CLASSES", DEFAULT_PYTHON_CLASSES, true) }
     override val pythonFunctions: Regex by lazy { parseWildcardPatternsFromToml("$PYPROJECT_PYTEST_SECTION.$CONFIG_PYTHON_FUNCTIONS", DEFAULT_PYTHON_FUNCTIONS, false) }
+    override val pythonFiles: Regex by lazy { parseWildcardPatternsFromToml("$PYPROJECT_PYTEST_SECTION.$CONFIG_PYTHON_FILES", DEFAULT_PYTHON_FILES, false) }
 
     private fun parseWildcardPatternsFromToml(dottedKey: String, defaultPatterns: String, withDashes: Boolean): Regex {
         return if (pyprojectToml.isArray(dottedKey)) {

@@ -14,26 +14,31 @@ import javax.swing.JComponent
 import javax.swing.JPanel
 
 
-
 class PyTestImpSettingsComponent(val project: Project) {
     private val myPyTestIniPathText = TextFieldWithBrowseButton()
 
     init {
         myPyTestIniPathText.addBrowseFolderListener(
+            @Suppress("DialogTitleCapitalization")
             "Choose py.test Config File",
             "Path to pytest.ini or pyproject.toml:",
             project,
             FileChooserDescriptor(true, false, false, false, false, false)
                 .withFileFilter {
                     Comparing.equal(it.name, "pytest.ini", SystemInfo.isFileSystemCaseSensitive)
-                        || Comparing.equal(it.name, "pyproject.toml", SystemInfo.isFileSystemCaseSensitive)
+                            || Comparing.equal(it.name, "pyproject.toml", SystemInfo.isFileSystemCaseSensitive)
                 }
                 .withRoots(ProjectRootManager.getInstance(project).contentRoots.asList())
         )
     }
 
     val panel: JPanel = FormBuilder.createFormBuilder()
-        .addLabeledComponent(JBLabel("Path to pytest configuration (pytest.ini or pyproject.toml): "), myPyTestIniPathText, 1, true)
+        .addLabeledComponent(
+            JBLabel("Path to pytest configuration (pytest.ini or pyproject.toml): "),
+            myPyTestIniPathText,
+            1,
+            true,
+        )
         .addComponentFillVertically(JPanel(), 0)
         .panel
 
@@ -55,6 +60,7 @@ class PyTestImpSettingsConfigurable(val project: Project) : Configurable {
     }
 
     override fun getDisplayName(): String {
+        @Suppress("DialogTitleCapitalization")
         return "py.test"
     }
 
