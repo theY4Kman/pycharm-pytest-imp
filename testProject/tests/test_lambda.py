@@ -65,3 +65,34 @@ class TestThings:
 
         def test_biz(self, fut, nut, butt, stuff):
             pass
+
+
+scalar_params = lambda_fixture(params=[
+    'a',
+    2,
+    3.0,
+    pytest.param(b''),
+])
+tuple_params = lambda_fixture(params=[
+    ('a', 1),
+    (2, 'b'),
+    pytest.param(3j, b'c'),
+])
+des_a, des_b, des_c = lambda_fixture(params=[
+    pytest.param(1, 2.0, 3j),
+    pytest.param('a', 'b', 'c'),
+])
+ref_a, ref_b, ref_c = lambda_fixture('des_a', 'des_b', 'des_c')
+tuple_fixture = static_fixture((1, 2.0, 3j, 'four'))
+tref_a, tref_b, tref_c, tref_d = lambda_fixture('tuple_fixture')
+
+
+def test_params(
+    scalar_params,
+    tuple_params,
+    des_a, des_b, des_c,
+    ref_a, ref_b, ref_c,
+    tuple_fixture,
+    tref_a, tref_b, tref_c, tref_d
+):
+    pass

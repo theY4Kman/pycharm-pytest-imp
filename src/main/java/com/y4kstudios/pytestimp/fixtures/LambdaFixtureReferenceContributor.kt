@@ -16,10 +16,13 @@ import com.jetbrains.python.testing.pyTestFixtures.PyTestFixtureReference
 
 class LambdaFixtureReference(expression: PyExpression, fixture: PyTestFixture) : BaseReference(expression) {
     private val resolveRef = fixture.resolveTarget?.let { SmartPointerManager.createPointer(it) }
-    private val callRef = ((fixture.resolveTarget as? PyTargetExpression)?.findAssignedValue() as? PyCallExpression)?.let { SmartPointerManager.createPointer(it) }
+    private val targetExpression = (fixture.resolveTarget as? PyTargetExpression)?.let { SmartPointerManager.createPointer(it) }
+    private val callRef = targetExpression?.element?.findAssignmentCall()?.let { SmartPointerManager.createPointer(it) }
     private val functionRef = fixture.function?.let { SmartPointerManager.createPointer(it) }
 
     override fun resolve() = resolveRef?.element
+
+    fun getTargetExpression() = targetExpression?.element
 
     fun getCall() = callRef?.element
 
@@ -38,9 +41,43 @@ class LambdaFixtureReference(expression: PyExpression, fixture: PyTestFixture) :
         return super.handleElementRename(newElementName)
     }
 
-    fun getType(context: TypeEvalContext): PyType? =
-        getCall()?.getLambdaFixtureType(context)?.get()
-            ?: getFunction()?.getReturnStatementType(context)
+    fun getType(context: TypeEvalContext): PyType? {
+        val call = getCall()
+        if (call != null) {
+            val type = call.getLambdaFixtureType(context)?.get() ?: return null
+
+            val targetExpression = getTargetExpression()
+            // Handle destructuring assignments
+            if (targetExpression != null && targetExpression.parent is PyTupleExpression) {
+                // Trying to destructure a non-destructurable fixture call is an erroneous situation
+                if (!call.supportsLambdaFixtureDestructuring(context)) return null
+
+                val destructuredIndex = targetExpression.parent.children.indexOf(targetExpression)
+                when (type) {
+                    // We'll get a top-level union type when the call has a "params" kwarg with heterogeneous values
+                    // e.g. lambda_fixture(params=[pytest.param(1, 2.0), pytest.param(3j, 'four')])
+                    is PyUnionType -> {
+                        val memberTypes = type.members
+                        if (memberTypes.isEmpty() || memberTypes.any { it !is PyTupleType }) return null
+
+                        return PyUnionType.union(memberTypes.map { (it as PyTupleType).getElementType(destructuredIndex) })
+                    }
+
+                    // And we'll get a tuple type if the call references multiple other fixtures
+                    // e.g. lambda_fixture('a', 'b')
+                    is PyTupleType -> {
+                        return type.getElementType(destructuredIndex)
+                    }
+
+                    // If we're trying to destructure a scalar value, there's nothing we can do
+                    else -> return null
+                }
+            }
+
+            return type
+        }
+        return getFunction()?.getReturnStatementType(context)
+    }
 
     override fun isReferenceTo(element: PsiElement): Boolean {
         if (super.isReferenceTo(element))

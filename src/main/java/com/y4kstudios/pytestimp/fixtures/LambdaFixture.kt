@@ -242,12 +242,12 @@ internal fun PyClass.visitNestingClassAttributes(processor: Processor<PyTargetEx
 internal fun PyTestFixture.getLambdaFunction(): PyLambdaExpression? =  (resolveTarget as? PyTargetExpression)?.getLambdaFunction()
 
 internal fun PyTargetExpression.getLambdaFunction(): PyLambdaExpression? {
-    val assignedValue = this.findAssignedValue() as? PyCallExpression ?: return null
+    val assignedValue = findAssignmentCall() ?: return null
     return if (assignedValue.isLambdaFixture()) assignedValue.getLambdaFunction() else null
 }
 
 internal fun PyTargetExpression.getStaticFixtureValue(): PyExpression? {
-    val assignedValue = this.findAssignedValue() as? PyCallExpression ?: return null
+    val assignedValue = findAssignmentCall() ?: return null
     return if (assignedValue.isStaticFixture()) assignedValue.getStaticFixtureValue() else null
 }
 
@@ -290,6 +290,23 @@ internal fun getFixtureReferenceType(reference: PsiReference, context: TypeEvalC
 internal fun PyCallExpression.isLambdaFixtureImplicitRef(): Boolean =
     this.isLambdaFixture() && this.arguments.isEmpty() && this.argumentList?.getKeywordArgument("params") == null
 
+internal fun PyCallExpression.supportsLambdaFixtureDestructuring(context: TypeEvalContext): Boolean {
+    if (!isLambdaFixture()) return false
+
+    val paramsArg = this.argumentList?.getKeywordArgument("params")
+    if (paramsArg != null) {
+        val paramsList = paramsArg.valueExpression as? PySequenceExpression ?: return false
+        return paramsList.elements.any {
+            if (it is PyCallExpression && it.isCalleeName(PyTestFQNames.PYTEST_PARAM))
+                it.arguments.filterNot { it is PyKeywordArgument }.let { it.size > 1 }
+            else
+                context.getType(it) is PyTupleType
+        }
+    }
+
+    return arguments.filterIsInstance<PyStringLiteralExpression>().size > 1
+}
+
 internal fun PyCallExpression.getLambdaFixtureType(context: TypeEvalContext): Ref<PyType>? {
     if (this.isLambdaFixture()) {
         val lambda = this.getLambdaFunction()
@@ -318,7 +335,9 @@ internal fun PyCallExpression.getLambdaFixtureType(context: TypeEvalContext): Re
                                         // pytest.param('single-value')
                                         1 -> context.getType(arguments[0])
                                         // pytest.param('multiple', 'values')
-                                        else -> PyTupleType.create(argumentList, arguments.map { arg -> context.getType(arg) })
+                                        else -> PyTupleType.create(argumentList, arguments.map {
+                                                arg -> context.getType(arg)
+                                        })
                                     }
                                 }
                             }
@@ -351,14 +370,27 @@ internal fun PyCallExpression.getLambdaFixtureType(context: TypeEvalContext): Re
     return null
 }
 
-internal fun PyTargetExpression.isAnyLambdaFixture(): Boolean {
-    val assignedValue = this.findAssignedValue()
-    return assignedValue is PyCallExpression && assignedValue.isAnyLambdaFixture()
+internal fun PyTargetExpression.findAssignmentCall(): PyCallExpression? {
+    /**
+     * NB: findAssignedValue() will fabricate a PySubscriptionExpression (e.g. `(assignedValue)[2]`) when the target is
+     *     part of a tuple expression (i.e. destructuring assignment). This fabricated expression will exist in a dummy
+     *     file. When trying to find the type of this fabricated expression, PyCharm will try to find the Python SDK
+     *     configured for the dummy file — but won't be able to.
+     *
+     *     To skirt this issue, we pull the assigned value directly from the containing PyAssignmentStatement. This
+     *     parent relationship *should* hold for all situations we're concerned with.
+    */
+    val assignmentExpr = this.parentOfType<PyAssignmentStatement>() ?: return null
+    val assignedValue = assignmentExpr.assignedValue
+    return assignedValue as? PyCallExpression
 }
+
+internal fun PyTargetExpression.isAnyLambdaFixture(): Boolean =
+    findAssignmentCall()?.isAnyLambdaFixture() ?: false
 
 internal val PyTargetExpression.asFixture: PyTestFixture?
     get() {
-        val call = this.findAssignedValue() as? PyCallExpression ?: return null
+        val call = findAssignmentCall() ?: return null
         if (!call.isAnyLambdaFixture()) {
             return null
         }

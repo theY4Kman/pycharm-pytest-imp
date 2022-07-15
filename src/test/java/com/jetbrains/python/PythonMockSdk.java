@@ -38,11 +38,11 @@ public final class PythonMockSdk {
     return create(sdkPath, LanguageLevel.getLatest());
   }
 
-  public static @NotNull Sdk create(@NotNull LanguageLevel level, VirtualFile @NotNull ... additionalRoots) {
+  public static @NotNull Sdk create(@NotNull LanguageLevel level, VirtualFile ... additionalRoots) {
     return create(PythonTestUtil.getTestDataPath() + "/MockSdk", level, additionalRoots);
   }
 
-  private static @NotNull Sdk create(@NotNull String sdkPath, @NotNull LanguageLevel level, VirtualFile @NotNull ... additionalRoots) {
+  private static @NotNull Sdk create(@NotNull String sdkPath, @NotNull LanguageLevel level, VirtualFile ... additionalRoots) {
     String sdkName = "Mock " + PyNames.PYTHON_SDK_ID_NAME + " " + level.toPythonVersion();
     return create(sdkName, sdkPath, new PyMockSdkType(level), level, additionalRoots);
   }
@@ -51,7 +51,7 @@ public final class PythonMockSdk {
                                     @NotNull String sdkPath,
                                     @NotNull SdkTypeId sdkType,
                                     @NotNull LanguageLevel level,
-                                    VirtualFile @NotNull ... additionalRoots) {
+                                    VirtualFile ... additionalRoots) {
     MultiMap<OrderRootType, VirtualFile> roots = MultiMap.create();
     roots.putValues(OrderRootType.CLASSES, createRoots(sdkPath, level));
     roots.putValues(OrderRootType.CLASSES, Arrays.asList(additionalRoots));
