@@ -10,13 +10,17 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+_To Be Released..._
+
+
+0.8.0, 2022-07-15
+-----------------
+
 **Features:**
  - Support for lambda_fixture destructuring
 
 **Fixed:**
  - Resolved null pointer exception related to pytest plugin/conftest fixtures search, which could impact code sense for completely unrelated files.
-
-_To Be Released..._
 
 
 0.7.1, 2022-06-28

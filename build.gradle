@@ -23,7 +23,7 @@ project.ext {
 apply plugin: 'kotlin'
 
 group 'com.y4kstudios'
-version '0.7.1'
+version '0.8.0'
 
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
