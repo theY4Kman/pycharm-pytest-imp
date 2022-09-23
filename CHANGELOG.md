@@ -10,10 +10,14 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+_To Be Released..._
+
+
+1.0.0, 2022-09-23
+-----------------
+
 **BREAKING:**
  - Added support for 2022.3, requiring a source/target Java compatibility of 17. Minimum supported PyCharm version is now 2022.3.
-
-_To Be Released..._
 
 
 0.8.0, 2022-07-15
