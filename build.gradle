@@ -1,6 +1,6 @@
 buildscript {
     project.ext.kotlin_version = '1.7.0'
-    project.ext.ide_version = '222-EAP-SNAPSHOT'
+    project.ext.ide_version = '223-EAP-SNAPSHOT'
 
     repositories {
         mavenCentral()
@@ -12,12 +12,12 @@ buildscript {
 
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '1.6.0'
+    id 'org.jetbrains.intellij' version '1.9.0'
 }
 
 project.ext {
-    source_compatibility = '10'
-    target_compatibility = '11'
+    source_compatibility = '17'
+    target_compatibility = '17'
 }
 
 apply plugin: 'kotlin'
@@ -54,12 +54,12 @@ repositories {
 }
 
 dependencies {
-    compile 'org.tomlj:tomlj:1.0.0'
-    compile 'ca.szc.configparser:java-configparser:0.2'
+    implementation 'org.tomlj:tomlj:1.0.0'
+    implementation 'ca.szc.configparser:java-configparser:0.2'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
-    testCompile group: 'junit', name: 'junit', version: '4.13.1'
+    testImplementation group: 'junit', name: 'junit', version: '4.13.1'
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
@@ -70,8 +70,8 @@ intellij {
 
     plugins.set([
         'python',
-        'PsiViewer:222-SNAPSHOT',
-        'org.toml.lang:222.3345.16',
+        'PsiViewer:223-SNAPSHOT',
+        'org.toml.lang:223.4884.72',
     ])
 
     patchPluginXml {
@@ -86,8 +86,8 @@ intellij {
             </ul>
         ''')
 
-        sinceBuild.set("212")
-        untilBuild.set("222.*")
+        sinceBuild.set("223")
+        untilBuild.set("223.*")
     }
 }
 
@@ -117,6 +117,16 @@ runIde {
 
 jar {
     exclude('com/jetbrains/**')
+}
+
+test {
+    /**
+     * Testing with PY since 2022.1 requires to also add com.intellij.platform.images (automatically provided in PC)
+     *
+     * Ref: https://youtrack.jetbrains.com/issue/IJSDK-1427/Running-tests-for-PyCharm-Professional-is-not-working
+     * Source: https://github.com/bigbear3001/pycharm-plugin-test-test/commit/38df5b1b999ccde10d6eb262600744e3214680cc
+     */
+    intellij.plugins.add("com.intellij.platform.images")
 }
 
 // Very primitive changelog extraction code
