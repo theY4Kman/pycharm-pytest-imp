@@ -1,5 +1,7 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 buildscript {
-    project.ext.kotlin_version = '1.7.0'
+    project.ext.kotlin_version = '1.7.20'
     project.ext.ide_version = '223-EAP-SNAPSHOT'
 
     repositories {
@@ -26,7 +28,7 @@ group 'com.y4kstudios'
 version '1.0.0'
 
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+tasks.withType(KotlinCompile).configureEach {
     kotlinOptions {
         jvmTarget = project.ext.target_compatibility
     }
