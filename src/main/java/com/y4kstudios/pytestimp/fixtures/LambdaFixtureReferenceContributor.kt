@@ -6,7 +6,9 @@ import com.intellij.patterns.PatternCondition
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.*
 import com.intellij.psi.util.parentOfType
+import com.intellij.util.ArrayUtil
 import com.intellij.util.ProcessingContext
+import com.intellij.util.containers.ContainerUtil
 import com.jetbrains.python.BaseReference
 import com.jetbrains.python.codeInsight.typing.PyTypingTypeProvider
 import com.jetbrains.python.psi.*
@@ -109,25 +111,47 @@ class LambdaFixtureReference(expression: PyExpression, fixture: PyTestFixture) :
     }
 }
 
+internal fun unwrapAwaitableType(coroutineOrAwaitableType: PyType?): Ref<PyType?>? {
+    val genericType = coroutineOrAwaitableType as? PyCollectionType
+    val classType = coroutineOrAwaitableType as? PyClassType
+
+    if (genericType != null && classType != null) {
+        val qName = classType.classQName
+        if ("typing.Awaitable" == qName) {
+            return Ref.create(ContainerUtil.getOrElse(genericType.elementTypes, 0, null))
+        }
+        if (PyTypingTypeProvider.COROUTINE == qName) {
+            return Ref.create(ContainerUtil.getOrElse(genericType.elementTypes, 2, null))
+        }
+    }
+
+    return null
+}
+
 internal fun PyTestFixtureReference.getType(context: TypeEvalContext): PyType? =
     getFunction()?.let { func ->
         val returnType = context.getReturnType(func)
 
         // Unwrap awaitable types, for async fixture support
-        PyTypingTypeProvider.coroutineOrGeneratorElementType(returnType)?.let { return it.get() }
+        unwrapAwaitableType(returnType)
+            ?.let { return it.get() }
 
         return if (!func.isGenerator) {
             returnType
         } else {
-            //If generator function returns collection this collection is generator
-            // which generates iteratedItemType.
-            // We also must open union (toStream)
-            val itemTypes = PyTypeUtil.toStream(returnType)
-                .map {
-                    if (it is PyCollectionType && PyTypingTypeProvider.isGenerator(it))
-                        it.iteratedItemType
-                    else it
-                }.toList()
+            val returnTypes =
+                if (returnType is PyUnionType)
+                    returnType.members
+                else
+                    listOf(returnType)
+
+            val itemTypes = returnTypes.map {
+                when {
+                    it is PyCollectionType && PyTypingTypeProvider.isGenerator(it) -> it.iteratedItemType
+                    else -> it
+                }
+            }
+
             PyUnionType.union(itemTypes)
         }
     }

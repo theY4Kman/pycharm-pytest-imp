@@ -13,7 +13,7 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.QualifiedName
 import com.intellij.psi.util.parentOfType
 import com.intellij.util.Processor
-import com.intellij.util.castSafelyTo
+import com.intellij.util.asSafely
 import com.jetbrains.extensions.python.isCalleeName
 import com.jetbrains.python.codeInsight.typing.PyTypingTypeProvider
 import com.jetbrains.python.nameResolver.NameResolverTools
@@ -157,11 +157,11 @@ internal fun getContributingPluginFiles(fromFile: PsiFile?): List<PsiFile> {
 
     // If root conftest contains a pytest_plugins decl, also add those referenced modules
     topLevelConftest
-        ?.castSafelyTo<PyFile>()
+        ?.asSafely<PyFile>()
         ?.findTopLevelAttribute("pytest_plugins")
         ?.findAssignedValue()
-        ?.castSafelyTo<PySequenceExpression>()
-        ?.elements?.mapNotNull { it.castSafelyTo<PyStringLiteralExpression>()?.stringValue }?.map { PytestLoadPlugin(it) }
+        ?.asSafely<PySequenceExpression>()
+        ?.elements?.mapNotNull { it.asSafely<PyStringLiteralExpression>()?.stringValue }?.map { PytestLoadPlugin(it) }
         ?.toCollection(extraPlugins)
 
     // Add any plugins loaded explicitly from pytest config
@@ -254,7 +254,7 @@ internal fun PyTargetExpression.getStaticFixtureValue(): PyExpression? {
 
 internal fun PyCallExpression.isLambdaFixture() = NameResolverTools.isCalleeShortCut(this, LambdaFixtureFQNames.LAMBDA_FIXTURE)
 internal fun PyCallExpression.getLambdaFunction() = this.getArgument(0, PyLambdaExpression::class.java)
-internal fun PyCallExpression.isLambdaFixtureAsync() = this.getKeywordArgument("async_")?.castSafelyTo<PyBoolLiteralExpression>()?.value ?: false
+internal fun PyCallExpression.isLambdaFixtureAsync() = this.getKeywordArgument("async_")?.asSafely<PyBoolLiteralExpression>()?.value ?: false
 
 internal fun PyCallExpression.isStaticFixture() = NameResolverTools.isCalleeShortCut(this, LambdaFixtureFQNames.STATIC_FIXTURE)
 internal fun PyCallExpression.getStaticFixtureValue(): PyExpression? = this.getArgument(0, PyExpression::class.java)

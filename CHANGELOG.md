@@ -10,6 +10,9 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+**Fixed:**
+ - Resolve incorrect type inference for non-async yield fixtures (see [GH#16](https://github.com/theY4Kman/pycharm-pytest-imp/issues/16))
+
 _To Be Released..._
 
 
@@ -65,7 +68,7 @@ _To Be Released..._
 -----------------
 
 **Fixed:**
- - Resolve `*args` types being reported incorrectly, for any function anywhere (whoops. see [GH#11](https://github.com/theY4Kman/pycharm-pytest-imp/issues/10 — thanks, [andrianovs](https://github.com/andrianovs) and [lancelote](https://github.com/lancelote))
+ - Resolve `*args` types being reported incorrectly, for any function anywhere (whoops. see [GH#11](https://github.com/theY4Kman/pycharm-pytest-imp/issues/11 — thanks, [andrianovs](https://github.com/andrianovs) and [lancelote](https://github.com/lancelote))
 
 
 0.5.4, 2022-02-14

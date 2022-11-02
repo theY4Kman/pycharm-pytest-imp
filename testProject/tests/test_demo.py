@@ -12,8 +12,9 @@ def caret(my_toplevel_static_fixture):
 @pytest.mark.parametrize('v', [
     pytest.param(1),
 ])
-def test_stuff(v):
+def test_stuff(v, monkeypatch):
     a = v
+    monkeypatch.setattr()
 
 
 a = lambda_fixture(lambda : 123)

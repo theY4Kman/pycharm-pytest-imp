@@ -71,7 +71,9 @@ intellij {
     plugins.set([
         'python',
         'PsiViewer:223-SNAPSHOT',
-        'org.toml.lang:223.4884.72',
+        // XXX(zk): this version number must be manually looked up waaay too often;
+        //          is there a way to pull this version number automatically?
+        'org.toml.lang:223.7255.15',
     ])
 
     patchPluginXml {
