@@ -10,10 +10,14 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+_To Be Released..._
+
+
+1.0.1, 2022-11-02
+-----------------
+
 **Fixed:**
  - Resolve incorrect type inference for non-async yield fixtures (see [GH#16](https://github.com/theY4Kman/pycharm-pytest-imp/issues/16))
-
-_To Be Released..._
 
 
 1.0.0, 2022-09-23
