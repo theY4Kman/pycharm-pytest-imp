@@ -12,6 +12,11 @@ refaux = lambda_fixture('real')
 
 asink = lambda_fixture(lambda: asyncio.sleep(0, 'test'), async_=True)
 
+lamb_defn = lambda: 3.0
+indirect_lamb = lambda_fixture(lamb_defn)
+asink_defn = lambda: asyncio.sleep(0, 'test')
+indirect_asink = lambda_fixture(asink_defn, async_=True)
+
 # stat = static_fixture(24)
 
 err = error_fixture(Exception)
@@ -28,7 +33,10 @@ def real():
 
 @pytest.fixture
 async def a_real_sink():
-    return 48
+    return '481'
+
+
+indirect_fixtures = lambda_fixture(lambda indirect_lamb, indirect_asink: (indirect_lamb, indirect_asink))
 
 
 ref_sinks = lambda_fixture(lambda asink, a_real_sink: (asink, a_real_sink))

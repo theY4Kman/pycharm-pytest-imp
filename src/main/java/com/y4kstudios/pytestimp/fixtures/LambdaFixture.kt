@@ -19,6 +19,7 @@ import com.jetbrains.python.codeInsight.typing.PyTypingTypeProvider
 import com.jetbrains.python.nameResolver.NameResolverTools
 import com.jetbrains.python.psi.*
 import com.jetbrains.python.psi.impl.PyEvaluator
+import com.jetbrains.python.psi.resolve.PyResolveContext
 import com.jetbrains.python.psi.types.PyTupleType
 import com.jetbrains.python.psi.types.PyType
 import com.jetbrains.python.psi.types.PyUnionType
@@ -239,13 +240,6 @@ internal fun PyClass.visitNestingClassAttributes(processor: Processor<PyTargetEx
     }, withSelf)
 }
 
-internal fun PyTestFixture.getLambdaFunction(): PyLambdaExpression? =  (resolveTarget as? PyTargetExpression)?.getLambdaFunction()
-
-internal fun PyTargetExpression.getLambdaFunction(): PyLambdaExpression? {
-    val assignedValue = findAssignmentCall() ?: return null
-    return if (assignedValue.isLambdaFixture()) assignedValue.getLambdaFunction() else null
-}
-
 internal fun PyTargetExpression.getStaticFixtureValue(): PyExpression? {
     val assignedValue = findAssignmentCall() ?: return null
     return if (assignedValue.isStaticFixture()) assignedValue.getStaticFixtureValue() else null
@@ -253,7 +247,14 @@ internal fun PyTargetExpression.getStaticFixtureValue(): PyExpression? {
 
 
 internal fun PyCallExpression.isLambdaFixture() = NameResolverTools.isCalleeShortCut(this, LambdaFixtureFQNames.LAMBDA_FIXTURE)
-internal fun PyCallExpression.getLambdaFunction() = this.getArgument(0, PyLambdaExpression::class.java)
+internal fun PyCallExpression.getLambdaFixtureCallable(resolveContext: PyResolveContext): PyCallable? {
+    var firstArg = this.getArgument(0, PyElement::class.java)
+    if (firstArg is PyReferenceExpression) {
+        val resolveResult = firstArg.followAssignmentsChain(resolveContext)
+        firstArg = resolveResult.element as? PyElement
+    }
+    return firstArg as? PyCallable
+}
 internal fun PyCallExpression.isLambdaFixtureAsync() = this.getKeywordArgument("async_")?.asSafely<PyBoolLiteralExpression>()?.value ?: false
 
 internal fun PyCallExpression.isStaticFixture() = NameResolverTools.isCalleeShortCut(this, LambdaFixtureFQNames.STATIC_FIXTURE)
@@ -309,9 +310,10 @@ internal fun PyCallExpression.supportsLambdaFixtureDestructuring(context: TypeEv
 
 internal fun PyCallExpression.getLambdaFixtureType(context: TypeEvalContext): Ref<PyType>? {
     if (this.isLambdaFixture()) {
-        val lambda = this.getLambdaFunction()
-        if (lambda != null) {
-            val returnType = context.getReturnType(lambda)
+        val pyResolveContext = PyResolveContext.defaultContext(context)
+        val callable = this.getLambdaFixtureCallable(pyResolveContext)
+        if (callable != null) {
+            val returnType = context.getReturnType(callable)
 
             // If an async fixture evaluates to an awaitable, use its wrapped type
             if (this.isLambdaFixtureAsync() && returnType != null) {

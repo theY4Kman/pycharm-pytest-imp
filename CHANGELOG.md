@@ -10,6 +10,9 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+**Fixed:**
+ - Resolved indirectly-defined lambda_fixture fixture definitions (e.g. `lambda_fixture(my_callable)`) always being typed as `tuple`
+
 _To Be Released..._
 
 
