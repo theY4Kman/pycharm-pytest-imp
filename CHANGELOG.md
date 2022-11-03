@@ -10,11 +10,15 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+_To Be Released..._
+
+
+1.0.2, 2022-11-03
+-----------------
+
 **Fixed:**
  - Resolved indirectly-defined lambda_fixture fixture definitions (e.g. `lambda_fixture(my_callable)`) always being typed as `tuple`
  - Resolve explicit typing annotations on requested fixtures being ignored again, in 2022.3
-
-_To Be Released..._
 
 
 1.0.1, 2022-11-02
