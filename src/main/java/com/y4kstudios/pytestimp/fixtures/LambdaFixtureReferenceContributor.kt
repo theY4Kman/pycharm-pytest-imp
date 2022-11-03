@@ -166,8 +166,8 @@ object LambdaFixtureTypeProvider : PyTypeProviderBase() {
             return null
         }
 
-        val explicitType = param.getArgumentType(context)
-        if (explicitType != null) {
+        // Defer to PyCharm if the param has an explicit type
+        if (param.annotation != null) {
             return null;
         }
 

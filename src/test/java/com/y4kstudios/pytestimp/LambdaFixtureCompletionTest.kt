@@ -65,7 +65,7 @@ class LambdaFixtureCompletionTest : PyTestTestCase() {
             my_toplevel_lambda_fixture = lambda_fixture(lambda: 123)
             my_toplevel_static_fixture = static_fixture('abc')
 
-            caret = lambda_fixture('my_toplevel_pytest_fixture,<caret>')
+            caret = lambda_fixture('my_toplevel_pytest_fixture','<caret>')
         """.trimIndent()
 
         doTest(
