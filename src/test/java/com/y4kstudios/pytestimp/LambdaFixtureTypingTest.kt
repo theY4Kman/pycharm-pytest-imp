@@ -5,6 +5,7 @@ import com.jetbrains.python.psi.PyTypedElement
 import com.jetbrains.python.psi.types.TypeEvalContext
 import junit.framework.ComparisonFailure
 import org.intellij.lang.annotations.Language
+import org.junit.Ignore
 import org.junit.Test
 
 class LambdaFixtureTypingTest : PyTestTestCase() {
@@ -35,6 +36,16 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
         """)
     }
 
+    fun testStaticFixtureRefTypeFromPytestParam() {
+        doTestStaticFixtureType_int("""
+            my_toplevel_static_fixture_ref = lambda_fixture('my_toplevel_static_fixture')
+
+            @pytest.fixture
+            def caret(my_toplevel_<caret>static_fixture_ref):
+                pass
+        """)
+    }
+
     fun testStaticFixtureTypeFromPytestParamWithExplicitAnnotation() {
         doTestStaticFixtureType("123", "str", """
             @pytest.fixture
@@ -48,6 +59,16 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
             @pytest.fixture
             def caret(my_toplevel_static_fixture):
                 _ = my_toplevel_<caret>static_fixture
+        """)
+    }
+
+    fun testStaticFixtureRefTypeFromPytestParamLocal() {
+        doTestStaticFixtureType_int("""
+            my_toplevel_static_fixture_ref = lambda_fixture('my_toplevel_static_fixture')
+
+            @pytest.fixture
+            def caret(my_toplevel_static_fixture_ref):
+                _ = my_toplevel_<caret>static_fixture_ref
         """)
     }
 
@@ -69,6 +90,14 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
     fun testStaticFixtureTypeFromLambdaParamLocal() {
         doTestStaticFixtureType_int("""
             caret = lambda_fixture(lambda my_toplevel_static_fixture: my_toplevel_<caret>static_fixture)
+        """)
+    }
+
+    fun testStaticFixtureRefTypeFromLambdaParamLocal() {
+        doTestStaticFixtureType_int("""
+            my_toplevel_static_fixture_ref = lambda_fixture('my_toplevel_static_fixture')
+
+            caret = lambda_fixture(lambda my_toplevel_static_fixture_ref: my_toplevel_<caret>static_fixture_ref)
         """)
     }
 
@@ -101,6 +130,16 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
         """)
     }
 
+    fun testPytestFixtureRefTypeFromPytestParam() {
+        doTestPytestFixtureType_int("""
+            my_toplevel_pytest_fixture_ref = lambda_fixture('my_toplevel_pytest_fixture')
+
+            @pytest.fixture
+            def caret(my_toplevel_<caret>pytest_fixture_ref):
+                pass
+        """)
+    }
+
     fun testPytestFixtureTypeFromPytestParamWithExplicitAnnotation() {
         doTestPytestFixtureType("345", "str", """
             @pytest.fixture
@@ -114,6 +153,16 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
             @pytest.fixture
             def caret(my_toplevel_pytest_fixture):
                 _ = my_toplevel_<caret>pytest_fixture
+        """)
+    }
+
+    fun testPytestFixtureRefTypeFromPytestParamLocal() {
+        doTestPytestFixtureType_int("""
+            my_toplevel_pytest_fixture_ref = lambda_fixture('my_toplevel_pytest_fixture')
+
+            @pytest.fixture
+            def caret(my_toplevel_pytest_fixture_ref):
+                _ = my_toplevel_<caret>pytest_fixture_ref
         """)
     }
 
@@ -135,6 +184,14 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
     fun testPytestFixtureTypeFromLambdaParamLocal() {
         doTestPytestFixtureType_int("""
             caret = lambda_fixture(lambda my_toplevel_pytest_fixture: my_toplevel_<caret>pytest_fixture)
+        """)
+    }
+
+    fun testPytestFixtureRefTypeFromLambdaParamLocal() {
+        doTestPytestFixtureType_int("""
+            my_toplevel_pytest_fixture_ref = lambda_fixture('my_toplevel_pytest_fixture')
+
+            caret = lambda_fixture(lambda my_toplevel_pytest_fixture_ref: my_toplevel_<caret>pytest_fixture_ref)
         """)
     }
 
@@ -167,6 +224,16 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
         """)
     }
 
+    fun testPytestYieldFixtureRefTypeFromPytestParam() {
+        doTestPytestYieldFixtureType_int("""
+            my_toplevel_pytest_fixture_ref = lambda_fixture('my_toplevel_pytest_fixture')
+
+            @pytest.fixture
+            def caret(my_toplevel_<caret>pytest_fixture_ref):
+                pass
+        """)
+    }
+
     fun testPytestYieldFixtureTypeFromPytestParamWithExplicitAnnotation() {
         doTestPytestYieldFixtureType("567", "str", """
             @pytest.fixture
@@ -180,6 +247,16 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
             @pytest.fixture
             def caret(my_toplevel_pytest_fixture):
                 _ = my_toplevel_<caret>pytest_fixture
+        """)
+    }
+
+    fun testPytestYieldFixtureRefTypeFromPytestParamLocal() {
+        doTestPytestYieldFixtureType_int("""
+            my_toplevel_pytest_fixture_ref = lambda_fixture('my_toplevel_pytest_fixture')
+
+            @pytest.fixture
+            def caret(my_toplevel_pytest_fixture_ref):
+                _ = my_toplevel_<caret>pytest_fixture_ref
         """)
     }
 
@@ -201,6 +278,14 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
     fun testPytestYieldFixtureTypeFromLambdaParamLocal() {
         doTestPytestYieldFixtureType_int("""
             caret = lambda_fixture(lambda my_toplevel_pytest_fixture: my_toplevel_<caret>pytest_fixture)
+        """)
+    }
+
+    fun testPytestYieldFixtureRefTypeFromLambdaParamLocal() {
+        doTestPytestYieldFixtureType_int("""
+            my_toplevel_pytest_fixture_ref = lambda_fixture('my_toplevel_pytest_fixture')
+
+            caret = lambda_fixture(lambda my_toplevel_pytest_fixture_ref: my_toplevel_<caret>pytest_fixture_ref)
         """)
     }
 
@@ -231,6 +316,16 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
         """)
     }
 
+    fun testLambdaFixtureRefTypeFromPytestParam() {
+        doTestLambdaFixtureType_int("""
+            my_toplevel_lambda_fixture_ref = lambda_fixture('my_toplevel_lambda_fixture')
+
+            @pytest.fixture
+            def caret(my_toplevel_<caret>lambda_fixture_ref):
+                pass
+        """)
+    }
+
     fun testLambdaFixtureTypeFromPytestParamWithExplicitAnnotation() {
         doTestLambdaFixtureType("789", "str","""
             @pytest.fixture
@@ -244,6 +339,16 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
             @pytest.fixture
             def caret(my_toplevel_lambda_fixture):
                 _ = my_toplevel_<caret>lambda_fixture
+        """)
+    }
+
+    fun testLambdaFixtureRefTypeFromPytestParamLocal() {
+        doTestLambdaFixtureType_int("""
+            my_toplevel_lambda_fixture_ref = lambda_fixture('my_toplevel_lambda_fixture')
+
+            @pytest.fixture
+            def caret(my_toplevel_lambda_fixture_ref):
+                _ = my_toplevel_<caret>lambda_fixture_ref
         """)
     }
 
@@ -265,6 +370,14 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
     fun testLambdaFixtureTypeFromLambdaParamLocal() {
         doTestLambdaFixtureType_int("""
             caret = lambda_fixture(lambda my_toplevel_lambda_fixture: my_toplevel_<caret>lambda_fixture)
+        """)
+    }
+
+    fun testLambdaFixtureRefTypeFromLambdaParamLocal() {
+        doTestLambdaFixtureType_int("""
+            my_toplevel_lambda_fixture_ref = lambda_fixture('my_toplevel_lambda_fixture')
+
+            caret = lambda_fixture(lambda my_toplevel_lambda_fixture_ref: my_toplevel_<caret>lambda_fixture_ref)
         """)
     }
 
@@ -295,6 +408,16 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
         """)
     }
 
+    fun testLambdaParamsFixtureRefTypeFromPytestParam() {
+        doTestLambdaParamsFixtureType_Union("""
+            my_toplevel_lambda_fixture_ref = lambda_fixture('my_toplevel_lambda_fixture')
+
+            @pytest.fixture
+            def caret(my_toplevel_<caret>lambda_fixture_ref):
+                pass
+        """)
+    }
+
     fun testLambdaParamsFixtureTypeFromPytestParamWithExplicitAnnotation() {
         doTestLambdaParamsFixtureType("[1, 2.0, 'c']", "str", """
             @pytest.fixture
@@ -308,6 +431,16 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
             @pytest.fixture
             def caret(my_toplevel_lambda_fixture):
                 _ = my_toplevel_<caret>lambda_fixture
+        """)
+    }
+
+    fun testLambdaParamsFixtureRefTypeFromPytestParamLocal() {
+        doTestLambdaParamsFixtureType_Union("""
+            my_toplevel_lambda_fixture_ref = lambda_fixture('my_toplevel_lambda_fixture')
+
+            @pytest.fixture
+            def caret(my_toplevel_lambda_fixture_ref):
+                _ = my_toplevel_<caret>lambda_fixture_ref
         """)
     }
 
@@ -329,6 +462,14 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
     fun testLambdaParamsFixtureTypeFromLambdaParamLocal() {
         doTestLambdaParamsFixtureType_Union("""
             caret = lambda_fixture(lambda my_toplevel_lambda_fixture: my_toplevel_<caret>lambda_fixture)
+        """)
+    }
+
+    fun testLambdaParamsFixtureRefTypeFromLambdaParamLocal() {
+        doTestLambdaParamsFixtureType_Union("""
+            my_toplevel_lambda_fixture_ref = lambda_fixture('my_toplevel_lambda_fixture')
+
+            caret = lambda_fixture(lambda my_toplevel_lambda_fixture_ref: my_toplevel_<caret>lambda_fixture_ref)
         """)
     }
 
@@ -364,6 +505,16 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
         """)
     }
 
+    fun testLambdaPytestParamsFixtureRefTypeFromPytestParam() {
+        doTestLambdaPytestParamsFixtureType_Union("""
+            my_toplevel_lambda_fixture_ref = lambda_fixture('my_toplevel_lambda_fixture')
+
+            @pytest.fixture
+            def caret(my_toplevel_<caret>lambda_fixture_ref):
+                pass
+        """)
+    }
+
     fun testLambdaPytestParamsFixtureTypeFromPytestParamWithExplicitAnnotation() {
         doTestLambdaPytestParamsFixtureType("int","""
             @pytest.fixture
@@ -377,6 +528,16 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
             @pytest.fixture
             def caret(my_toplevel_lambda_fixture):
                 _ = my_toplevel_<caret>lambda_fixture
+        """)
+    }
+
+    fun testLambdaPytestParamsFixtureRefTypeFromPytestParamLocal() {
+        doTestLambdaPytestParamsFixtureType_Union("""
+            my_toplevel_lambda_fixture_ref = lambda_fixture('my_toplevel_lambda_fixture')
+
+            @pytest.fixture
+            def caret(my_toplevel_lambda_fixture_ref):
+                _ = my_toplevel_<caret>lambda_fixture_ref
         """)
     }
 
@@ -398,6 +559,14 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
     fun testLambdaPytestParamsFixtureTypeFromLambdaParamLocal() {
         doTestLambdaPytestParamsFixtureType_Union("""
             caret = lambda_fixture(lambda my_toplevel_lambda_fixture: my_toplevel_<caret>lambda_fixture)
+        """)
+    }
+
+    fun testLambdaPytestParamsFixtureRefTypeFromLambdaParamLocal() {
+        doTestLambdaPytestParamsFixtureType_Union("""
+            my_toplevel_lambda_fixture_ref = lambda_fixture('my_toplevel_lambda_fixture')
+
+            caret = lambda_fixture(lambda my_toplevel_lambda_fixture_ref: my_toplevel_<caret>lambda_fixture_ref)
         """)
     }
 

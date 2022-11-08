@@ -32,9 +32,23 @@ def real():
 
 
 @pytest.fixture
-async def a_real_sink():
+async def a_real_sink(
+    py_pluggo,
+    yield_pluggo,
+    explicit_yield_pluggo,
+    async_yield_pluggo,
+    explicit_async_yield_pluggo,
+    pluggo_refs,
+):
     return '481'
 
+
+pluggo_refs = lambda_fixture(
+    'yield_pluggo',
+    'explicit_yield_pluggo',
+    'async_yield_pluggo',
+    'explicit_async_yield_pluggo',
+)
 
 indirect_fixtures = lambda_fixture(lambda indirect_lamb, indirect_asink: (indirect_lamb, indirect_asink))
 
@@ -42,7 +56,7 @@ indirect_fixtures = lambda_fixture(lambda indirect_lamb, indirect_asink: (indire
 ref_sinks = lambda_fixture(lambda asink, a_real_sink: (asink, a_real_sink))
 
 
-def test_stuff(ref, butt, faux, real, asink, a_real_sink, ):
+def test_stuff(ref, butt, faux, real, asink, a_real_sink, pluggo_refs):
     a = faux
     b = butt
     c = real

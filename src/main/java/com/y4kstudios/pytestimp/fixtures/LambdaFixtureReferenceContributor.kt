@@ -45,40 +45,39 @@ class LambdaFixtureReference(expression: PyExpression, fixture: PyTestFixture) :
 
     fun getType(context: TypeEvalContext): PyType? {
         val call = getCall()
-        if (call != null) {
-            val type = call.getLambdaFixtureType(context)?.get() ?: return null
+            ?: return getPyTestFixtureFunctionType(getFunction(), context)
 
-            val targetExpression = getTargetExpression()
-            // Handle destructuring assignments
-            if (targetExpression != null && targetExpression.parent is PyTupleExpression) {
-                // Trying to destructure a non-destructurable fixture call is an erroneous situation
-                if (!call.supportsLambdaFixtureDestructuring(context)) return null
+        val type = call.getLambdaFixtureType(context)?.get() ?: return null
 
-                val destructuredIndex = targetExpression.parent.children.indexOf(targetExpression)
-                when (type) {
-                    // We'll get a top-level union type when the call has a "params" kwarg with heterogeneous values
-                    // e.g. lambda_fixture(params=[pytest.param(1, 2.0), pytest.param(3j, 'four')])
-                    is PyUnionType -> {
-                        val memberTypes = type.members
-                        if (memberTypes.isEmpty() || memberTypes.any { it !is PyTupleType }) return null
+        val targetExpression = getTargetExpression()
+        // Handle destructuring assignments
+        if (targetExpression != null && targetExpression.parent is PyTupleExpression) {
+            // Trying to destructure a non-destructurable fixture call is an erroneous situation
+            if (!call.supportsLambdaFixtureDestructuring(context)) return null
 
-                        return PyUnionType.union(memberTypes.map { (it as PyTupleType).getElementType(destructuredIndex) })
-                    }
+            val destructuredIndex = targetExpression.parent.children.indexOf(targetExpression)
+            when (type) {
+                // We'll get a top-level union type when the call has a "params" kwarg with heterogeneous values
+                // e.g. lambda_fixture(params=[pytest.param(1, 2.0), pytest.param(3j, 'four')])
+                is PyUnionType -> {
+                    val memberTypes = type.members
+                    if (memberTypes.isEmpty() || memberTypes.any { it !is PyTupleType }) return null
 
-                    // And we'll get a tuple type if the call references multiple other fixtures
-                    // e.g. lambda_fixture('a', 'b')
-                    is PyTupleType -> {
-                        return type.getElementType(destructuredIndex)
-                    }
-
-                    // If we're trying to destructure a scalar value, there's nothing we can do
-                    else -> return null
+                    return PyUnionType.union(memberTypes.map { (it as PyTupleType).getElementType(destructuredIndex) })
                 }
-            }
 
-            return type
+                // And we'll get a tuple type if the call references multiple other fixtures
+                // e.g. lambda_fixture('a', 'b')
+                is PyTupleType -> {
+                    return type.getElementType(destructuredIndex)
+                }
+
+                // If we're trying to destructure a scalar value, there's nothing we can do
+                else -> return null
+            }
         }
-        return getFunction()?.getReturnStatementType(context)
+
+        return type
     }
 
     override fun isReferenceTo(element: PsiElement): Boolean {
@@ -129,14 +128,17 @@ internal fun unwrapAwaitableType(coroutineOrAwaitableType: PyType?): Ref<PyType?
 }
 
 internal fun PyTestFixtureReference.getType(context: TypeEvalContext): PyType? =
-    getFunction()?.let { func ->
-        val returnType = context.getReturnType(func)
+    getPyTestFixtureFunctionType(getFunction(), context)
+
+internal fun getPyTestFixtureFunctionType(function: PyFunction?, context: TypeEvalContext): PyType? =
+    function?.let {
+        val returnType = context.getReturnType(function)
 
         // Unwrap awaitable types, for async fixture support
         unwrapAwaitableType(returnType)
             ?.let { return it.get() }
 
-        return if (!func.isGenerator) {
+        return if (!function.isGenerator) {
             returnType
         } else {
             val returnTypes =
@@ -154,6 +156,7 @@ internal fun PyTestFixtureReference.getType(context: TypeEvalContext): PyType? =
 
             PyUnionType.union(itemTypes)
         }
+
     }
 
 object LambdaFixtureTypeProvider : PyTypeProviderBase() {
