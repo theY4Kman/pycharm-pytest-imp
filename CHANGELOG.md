@@ -10,10 +10,14 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+_To Be Released..._
+
+
+1.0.3, 2022-11-08
+-----------------
+
 **Fixed:**
  - Resolved lambda_fixture refs to yield fixtures providing incorrect type
-
-_To Be Released..._
 
 
 1.0.2, 2022-11-03
