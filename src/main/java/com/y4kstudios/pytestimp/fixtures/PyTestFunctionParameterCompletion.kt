@@ -6,8 +6,10 @@ import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.patterns.PatternCondition
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.psi.util.elementType
 import com.intellij.psi.util.parentOfType
 import com.intellij.util.ProcessingContext
+import com.jetbrains.python.PyTokenTypes
 import com.jetbrains.python.codeInsight.completion.PythonLookupElement
 import com.jetbrains.python.psi.*
 import com.jetbrains.python.psi.types.TypeEvalContext
@@ -41,33 +43,43 @@ class PyTestParameterCompletionContributor : CompletionContributor() {
 
 private object PyTestFunctionLambdaFixtureArgumentCompletion : CompletionProvider<CompletionParameters>() {
     override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
-        val pyCallable = PsiTreeUtil.getParentOfType(parameters.position, PyParameterList::class.java)?.containingCallable ?: return
+        val element = when (parameters.originalPosition.elementType) {
+            PyTokenTypes.COLON -> parameters.originalPosition?.prevSibling
+            else -> parameters.originalPosition
+        } ?: return
+        val pyCallable = PsiTreeUtil.getNonStrictParentOfType(element, PyParameterList::class.java)?.containingCallable ?: return
+        val ourFixture = when (pyCallable) {
+            is PyFunction -> pyCallable
+            is PyLambdaExpression -> PsiTreeUtil.getParentOfType(pyCallable, PyCallExpression::class.java)
+            else -> null
+        }
+
         val module = ModuleUtilCore.findModuleForPsiElement(pyCallable) ?: return
         val typeEvalContext = TypeEvalContext.codeCompletion(pyCallable.project, pyCallable.containingFile)
         val usedParams = pyCallable.getParameters(typeEvalContext).mapNotNull { it.name }.toSet()
 
-        val target = pyCallable.parentOfType<PyCallExpression>()?.let { call ->
-            call.parentOfType<PyAssignmentStatement>()
-                ?.targetsToValuesMapping
-                ?.firstOrNull { it.second == call }
-                ?.first
-        }
-
         getFixtures(module, pyCallable, typeEvalContext)
-                .filter { !usedParams.contains(it.name) && it.resolveTarget != target }
-                .forEach {
-                    val icon =
-                            if (it.isLambdaFixture()) AllIcons.Nodes.Variable
-                            else AllIcons.Nodes.Function
-                    result.addElement(PythonLookupElement(it.name, false, icon))
+            .filter {
+                if (usedParams.contains(it.name)) return@filter false
+                return@filter when (val resolveTarget = it.resolveTarget) {
+                    is PyTargetExpression -> resolveTarget.findAssignmentCall() != ourFixture
+                    else -> resolveTarget != ourFixture
                 }
+            }
+            .forEach {
+                val icon =
+                    if (it.isLambdaFixture()) AllIcons.Nodes.Variable
+                    else AllIcons.Nodes.Function
+                result.addElement(PythonLookupElement(it.name, false, icon))
+            }
     }
 }
 
 private object LambdaFixtureReferenceArgumentCompletion : CompletionProvider<CompletionParameters>() {
     override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
-        val argList = PsiTreeUtil.getParentOfType(parameters.position, PyArgumentList::class.java) ?: return
-        val module = ModuleUtilCore.findModuleForPsiElement(parameters.position) ?: return
+        val stringArg = parameters.originalPosition as? PyPlainStringElement ?: return
+        val argList = PsiTreeUtil.getParentOfType(stringArg, PyArgumentList::class.java) ?: return
+        val module = ModuleUtilCore.findModuleForPsiElement(stringArg) ?: return
         val typeEvalContext = TypeEvalContext.codeCompletion(argList.project, argList.containingFile)
 
         val usedRefs = HashSet<String>()
@@ -84,13 +96,13 @@ private object LambdaFixtureReferenceArgumentCompletion : CompletionProvider<Com
                 ?.first
         }
 
-        getFixtures(module, parameters.position, typeEvalContext)
-                .filter { !usedRefs.contains(it.name) && it.resolveTarget != target }
-                .forEach {
-                    val icon =
-                            if (it.isLambdaFixture()) AllIcons.Nodes.Variable
-                            else AllIcons.Nodes.Function
-                    result.addElement(PythonLookupElement(it.name, false, icon))
-                }
+        getFixtures(module, stringArg, typeEvalContext)
+            .filter { !usedRefs.contains(it.name) && it.resolveTarget != target }
+            .forEach {
+                val icon =
+                    if (it.isLambdaFixture()) AllIcons.Nodes.Variable
+                    else AllIcons.Nodes.Function
+                result.addElement(PythonLookupElement(it.name, false, icon))
+            }
     }
 }
