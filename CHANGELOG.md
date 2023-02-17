@@ -15,6 +15,9 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
  - Hide "shadows name from outer scope" message for fixture functions
  - Prevent fixture request parameters being marked unused
 
+**Changed:**
+ - Add support for 2023.1
+
 **Fixed:**
  - Ensure current fixture is not suggested in fixture completions
 
