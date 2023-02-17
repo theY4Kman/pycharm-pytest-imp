@@ -37,7 +37,7 @@ private val pyTestFactory = getFactoryById("py.test")
 internal fun isPyTestEnabled(module: Module) =
         TestRunnerService.getInstance(module).selectedFactory == pyTestFactory
 
-private val decoratorNames = arrayOf("pytest.fixture", "fixture")
+private val decoratorNames = arrayOf("pytest.fixture", "fixture", "pytest_asyncio.fixture")
 
 private val PyFunction.asFixture: PyTestFixture?
   get() = decoratorList?.decorators?.firstOrNull { it.name in decoratorNames }?.let { createFixture(it) }

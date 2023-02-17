@@ -10,6 +10,9 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+**Features:**
+ - Allow fixtures to be defined with `@pytest_asyncio.fixture`
+
 _To Be Released..._
 
 
