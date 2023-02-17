@@ -10,6 +10,12 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+_To Be Released..._
+
+
+1.1.0, 2023-02-17
+-----------------
+
 **Features:**
  - Allow fixtures to be defined with `@pytest_asyncio.fixture`
  - Hide "shadows name from outer scope" message for fixture functions
@@ -20,8 +26,6 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 
 **Fixed:**
  - Ensure current fixture is not suggested in fixture completions
-
-_To Be Released..._
 
 
 1.0.3, 2022-11-08
