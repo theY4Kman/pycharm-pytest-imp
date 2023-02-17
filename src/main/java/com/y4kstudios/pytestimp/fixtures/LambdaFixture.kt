@@ -37,7 +37,7 @@ private val pyTestFactory = getFactoryById("py.test")
 internal fun isPyTestEnabled(module: Module) =
         TestRunnerService.getInstance(module).selectedFactory == pyTestFactory
 
-private val decoratorNames = arrayOf("pytest.fixture", "fixture")
+private val decoratorNames = arrayOf("pytest.fixture", "fixture", "pytest_asyncio.fixture")
 
 private val PyFunction.asFixture: PyTestFixture?
   get() = decoratorList?.decorators?.firstOrNull { it.name in decoratorNames }?.let { createFixture(it) }
@@ -56,6 +56,8 @@ internal fun getFixture(element: PyNamedParameter, typeEvalContext: TypeEvalCont
     val func = PsiTreeUtil.getParentOfType(element, PyCallable::class.java) ?: return null
     return getFixture(element.name, func, typeEvalContext)
 }
+fun PyNamedParameter.isFixture(typeEvalContext: TypeEvalContext) = getFixture(this, typeEvalContext) != null
+
 
 internal fun getFixture(name: String?, source: PsiElement, typeEvalContext: TypeEvalContext): PyTestFixture? {
     return getFixtures(source, typeEvalContext).firstOrNull { o -> o.name == name }

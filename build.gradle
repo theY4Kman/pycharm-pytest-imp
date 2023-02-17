@@ -14,7 +14,7 @@ buildscript {
 
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '1.9.0'
+    id 'org.jetbrains.intellij' version '1.12.0'
 }
 
 project.ext {
@@ -75,7 +75,8 @@ intellij {
         'PsiViewer:223-SNAPSHOT',
         // XXX(zk): this version number must be manually looked up waaay too often;
         //          is there a way to pull this version number automatically?
-        'org.toml.lang:223.7401.12',
+        // https://plugins.jetbrains.com/plugin/8195-toml/versions/stable
+        'org.toml.lang:223.8214.6',
     ])
 
     patchPluginXml {
