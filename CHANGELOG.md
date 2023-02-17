@@ -12,6 +12,7 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 
 **Features:**
  - Allow fixtures to be defined with `@pytest_asyncio.fixture`
+ - Hide "shadows name from outer scope" message for fixture functions
 
 _To Be Released..._
 
