@@ -7,7 +7,7 @@ import com.jetbrains.python.psi.PyNamedParameter
 import com.jetbrains.python.psi.PyTargetExpression
 import com.jetbrains.python.psi.types.TypeEvalContext
 
-object LambdaFixtureInspectionExtension : PyInspectionExtension() {
+class LambdaFixtureInspectionExtension : PyInspectionExtension() {
     override fun ignoreUnused(local: PsiElement, evalContext: TypeEvalContext) =
         local is PyNamedParameter && local.isFixture(evalContext)
 

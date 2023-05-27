@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
     project.ext.kotlin_version = '1.7.20'
-    project.ext.ide_version = '231-EAP-SNAPSHOT'
+    project.ext.ide_version = '232-EAP-SNAPSHOT'
 
     repositories {
         mavenCentral()
@@ -74,12 +74,12 @@ intellij {
         'python',
 
         // https://plugins.jetbrains.com/plugin/227-psiviewer/versions/stable
-        'PsiViewer:231-SNAPSHOT',
+        'PsiViewer:232.2-SNAPSHOT',
 
         // XXX(zk): this version number must be manually looked up waaay too often;
         //          is there a way to pull this version number automatically?
         // https://plugins.jetbrains.com/plugin/8195-toml/versions/stable
-        'org.toml.lang:231.6471.12',
+        'org.toml.lang:232.5150.113',
     ])
 
     patchPluginXml {
@@ -95,7 +95,7 @@ intellij {
         ''')
 
         sinceBuild.set("223")
-        untilBuild.set("231.*")
+        untilBuild.set("232.*")
     }
 }
 

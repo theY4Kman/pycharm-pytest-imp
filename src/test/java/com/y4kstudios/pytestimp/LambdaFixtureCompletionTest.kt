@@ -246,8 +246,8 @@ class LambdaFixtureCompletionTest : PyTestTestCase() {
         myFixture.configureByText("test.py", testFile)
         myFixture.complete(CompletionType.BASIC, 1)
 
-        val IGNORED = setOf("None", "False", "True")
-        val actual = myFixture.lookupElementStrings?.filter { !IGNORED.contains(it) }?.sorted()
+        val ignored = setOf("None", "False", "True")
+        val actual = myFixture.lookupElementStrings?.filter { !ignored.contains(it) }?.sorted()
         assertEquals(expected.toList().sorted(), actual)
     }
 }

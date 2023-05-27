@@ -9,7 +9,7 @@ import org.junit.runners.Parameterized
 class ConvertWildcardPatternToRegexPatternTest(
     pattern: String,
     private val matches: Collection<String>,
-    private val non_matches: Collection<String>)
+    private val nonMatches: Collection<String>)
     : TestCase()
 {
     companion object {
@@ -40,7 +40,7 @@ class ConvertWildcardPatternToRegexPatternTest(
 
     @Test
     fun testNonMatches() {
-        for (text in non_matches) {
+        for (text in nonMatches) {
             assert(!text.matches(regex))
         }
     }

@@ -36,22 +36,22 @@ import java.io.File
 class TestUtils {
 
     companion object {
-        val testDataFolder = "testData"
+        private const val TESTDATA_FOLDER = "testData"
 
         /**
-         * @throws [IllegalStateException] if the [testDataFolder] folder can't be found somewhere on the classpath.
+         * @throws [IllegalStateException] if the [TESTDATA_FOLDER] folder can't be found somewhere on the classpath.
          */
-        val computeBasePath by lazy {
+        val computeBasePath: String by lazy {
             val urlFromClassloader =
                 TestUtils::class.java.classLoader.getResource("TestUtils.class")
-            checkNotNull(urlFromClassloader) { "Could not find $testDataFolder" }
+            checkNotNull(urlFromClassloader) { "Could not find $TESTDATA_FOLDER" }
 
             var path: File? = File(urlFromClassloader.toURI())
-            while (path != null && path!!.exists() && !File(path, testDataFolder).isDirectory) {
-                path = path!!.parentFile
+            while (path != null && path.exists() && !File(path, TESTDATA_FOLDER).isDirectory) {
+                path = path.parentFile
             }
-            checkNotNull(path) { "Could not find $testDataFolder" }
-            File(path, testDataFolder).absolutePath
+            checkNotNull(path) { "Could not find $TESTDATA_FOLDER" }
+            File(path, TESTDATA_FOLDER).absolutePath
         }
 
     }

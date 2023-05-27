@@ -14,7 +14,7 @@ import com.jetbrains.python.psi.types.TypeEvalContext
 import com.jetbrains.python.testing.isTestElement
 import com.y4kstudios.pytestimp.PyTestImpService
 
-object PyTestLineMarkerContributor : RunLineMarkerContributor() {
+class PyTestLineMarkerContributor : RunLineMarkerContributor() {
     override fun getInfo(element: PsiElement): Info? {
         if ((element !is LeafPsiElement) || element.elementType != PyTokenTypes.IDENTIFIER) {
             return null
@@ -23,7 +23,6 @@ object PyTestLineMarkerContributor : RunLineMarkerContributor() {
 
         val typeEvalContext = TypeEvalContext.codeAnalysis(element.project, element.containingFile)
         if ((testElement is PyClass || testElement is PyFunction)
-            && (testElement is PsiNamedElement)
             && !isTestElement(testElement, ThreeState.UNSURE, typeEvalContext)  // don't add gutter icon if PyCharm already adds one
             && isPytestIniConfiguredTestElement(testElement)
             && testElement.parentsOfType(PyClass::class.java).all { isPytestIniConfiguredTestElement(it) }  // all parent classes should have valid test names, too

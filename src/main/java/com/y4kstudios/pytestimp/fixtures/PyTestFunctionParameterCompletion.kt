@@ -35,10 +35,6 @@ class PyTestParameterCompletionContributor : CompletionContributor() {
                                 )),
             LambdaFixtureReferenceArgumentCompletion)
     }
-
-    override fun fillCompletionVariants(parameters: CompletionParameters, result: CompletionResultSet) {
-        super.fillCompletionVariants(parameters, result)
-    }
 }
 
 private object PyTestFunctionLambdaFixtureArgumentCompletion : CompletionProvider<CompletionParameters>() {

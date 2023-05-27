@@ -40,9 +40,7 @@ import com.intellij.usageView.UsageInfo;
 import com.intellij.usages.Usage;
 import com.intellij.usages.rules.PsiElementUsage;
 import com.intellij.util.CommonProcessors.CollectProcessor;
-import com.intellij.util.ContentsUtil;
 import com.intellij.util.IncorrectOperationException;
-import com.intellij.util.containers.ContainerUtil;
 import com.jetbrains.python.PythonHelpersLocator;
 import com.jetbrains.python.PythonLanguage;
 import com.jetbrains.python.PythonTestUtil;
@@ -113,7 +111,7 @@ public abstract class PyTestCase extends UsefulTestCase {
    * Reformats currently configured file.
    */
   protected final void reformatFile() {
-    WriteCommandAction.runWriteCommandAction(null, () -> doPerformFormatting());
+    WriteCommandAction.runWriteCommandAction(null, this::doPerformFormatting);
   }
 
   private void doPerformFormatting() throws IncorrectOperationException {

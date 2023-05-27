@@ -6,7 +6,6 @@ import com.intellij.patterns.PatternCondition
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.*
 import com.intellij.psi.util.parentOfType
-import com.intellij.util.ArrayUtil
 import com.intellij.util.ProcessingContext
 import com.intellij.util.containers.ContainerUtil
 import com.jetbrains.python.BaseReference
@@ -159,7 +158,7 @@ internal fun getPyTestFixtureFunctionType(function: PyFunction?, context: TypeEv
 
     }
 
-object LambdaFixtureTypeProvider : PyTypeProviderBase() {
+class LambdaFixtureTypeProvider : PyTypeProviderBase() {
     override fun getParameterType(param: PyNamedParameter, func: PyFunction, context: TypeEvalContext): Ref<PyType>? {
         return getParameterType(param, func as PyCallable, context)
     }
@@ -171,7 +170,7 @@ object LambdaFixtureTypeProvider : PyTypeProviderBase() {
 
         // Defer to PyCharm if the param has an explicit type
         if (param.annotation != null) {
-            return null;
+            return null
         }
 
         return (
@@ -182,19 +181,19 @@ object LambdaFixtureTypeProvider : PyTypeProviderBase() {
     }
 
     override fun getReferenceType(referenceTarget: PsiElement, context: TypeEvalContext, anchor: PsiElement?): Ref<PyType>? {
-        if (referenceTarget !is PyNamedParameter) return null;
+        if (referenceTarget !is PyNamedParameter) return null
 
-        val paramList = referenceTarget.parent as? PyParameterList ?: return null;
+        val paramList = referenceTarget.parent as? PyParameterList ?: return null
         val callable = paramList.containingCallable ?: return null
         return getParameterType(referenceTarget, callable, context)
     }
 
     /** Expose pretty types for lambda_fixture lambda expression callables */
     override fun getCallableType(callable: PyCallable, context: TypeEvalContext): PyType? {
-        if (callable !is PyLambdaExpression) return null;
+        if (callable !is PyLambdaExpression) return null
 
         val call = callable.parentOfType<PyCallExpression>() ?: return null
-        if (!call.isAnyLambdaFixture()) return null;
+        if (!call.isAnyLambdaFixture()) return null
 
         val callableParams =
             callable.parameterList.parameters

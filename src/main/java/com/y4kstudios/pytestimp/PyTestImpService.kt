@@ -18,7 +18,6 @@ import com.intellij.util.execution.ParametersListUtil
 import com.jetbrains.commandInterface.commandLine.CommandLineLanguage
 import com.jetbrains.commandInterface.commandLine.psi.CommandLineArgument
 import com.jetbrains.commandInterface.commandLine.psi.CommandLineFile
-import com.jetbrains.python.sdk.poetry.PY_PROJECT_TOML
 import org.tomlj.Toml
 import org.tomlj.TomlParseResult
 import java.io.BufferedReader
@@ -27,6 +26,7 @@ import java.nio.file.Paths
 
 
 @State(name = "PyTestImpService", storages = [Storage("other.xml")])
+@Service(Service.Level.PROJECT)
 class PyTestImpService(val project: Project) : PersistentStateComponent<PyTestImpService.State> {
     companion object {
         fun getInstance(project: Project): PyTestImpService =

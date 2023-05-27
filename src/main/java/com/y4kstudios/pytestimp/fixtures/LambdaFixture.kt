@@ -108,19 +108,6 @@ internal fun getFixtures(module: Module, forWhat: PsiElement, context: TypeEvalC
     return classBasedFixtures + topLevelFixtures
 }
 
-internal fun isTestFile(element: PsiElement?): Boolean {
-    if (element == null) return false
-
-    val containingFile = element.containingFile?.virtualFile ?: return false
-
-    val project = element.project
-    val pytestImpService = project.service<PyTestImpService>()
-    val pytestConfig = pytestImpService.pytestConfig ?: return false
-
-    val containingFileName = containingFile.name
-    return pytestConfig.pythonFiles.matches(containingFileName)
-}
-
 /**
  * Find a pytest `configfile` in the directory
  *
@@ -222,32 +209,6 @@ internal fun PyClass.visitNestingClasses(processor: Processor<PyClass>, withSelf
     } while (true)
 }
 
-internal fun PyClass.visitNestingMethods(processor: Processor<PyFunction>, context: TypeEvalContext) =
-        this.visitNestingMethods(processor, true, context)
-
-internal fun PyClass.visitNestingMethods(processor: Processor<PyFunction>, withSelf: Boolean, context: TypeEvalContext) {
-    this.visitNestingClasses(Processor {
-        it.visitMethods(processor, true, context)
-        true
-    }, withSelf)
-}
-
-internal fun PyClass.visitNestingClassAttributes(processor: Processor<PyTargetExpression>, context: TypeEvalContext) =
-        this.visitNestingClassAttributes(processor, true, context)
-
-internal fun PyClass.visitNestingClassAttributes(processor: Processor<PyTargetExpression>, withSelf: Boolean, context: TypeEvalContext) {
-    this.visitNestingClasses(Processor {
-        it.visitClassAttributes(processor, true, context)
-        true
-    }, withSelf)
-}
-
-internal fun PyTargetExpression.getStaticFixtureValue(): PyExpression? {
-    val assignedValue = findAssignmentCall() ?: return null
-    return if (assignedValue.isStaticFixture()) assignedValue.getStaticFixtureValue() else null
-}
-
-
 internal fun PyCallExpression.isLambdaFixture() = NameResolverTools.isCalleeShortCut(this, LambdaFixtureFQNames.LAMBDA_FIXTURE)
 internal fun PyCallExpression.getLambdaFixtureCallable(resolveContext: PyResolveContext): PyCallable? {
     var firstArg = this.getArgument(0, PyElement::class.java)
@@ -301,7 +262,7 @@ internal fun PyCallExpression.supportsLambdaFixtureDestructuring(context: TypeEv
         val paramsList = paramsArg.valueExpression as? PySequenceExpression ?: return false
         return paramsList.elements.any {
             if (it is PyCallExpression && it.isCalleeName(PyTestFQNames.PYTEST_PARAM))
-                it.arguments.filterNot { it is PyKeywordArgument }.let { it.size > 1 }
+                it.arguments.filterNot { arg -> arg is PyKeywordArgument }.let { arg -> arg.size > 1 }
             else
                 context.getType(it) is PyTupleType
         }
@@ -322,7 +283,7 @@ internal fun PyCallExpression.getLambdaFixtureType(context: TypeEvalContext): Re
                 PyTypingTypeProvider.coroutineOrGeneratorElementType(returnType)?.let { return it }
             }
 
-            return Ref(returnType);
+            return Ref(returnType)
         }
 
         val paramsArg = this.argumentList?.getKeywordArgument("params")
@@ -334,7 +295,7 @@ internal fun PyCallExpression.getLambdaFixtureType(context: TypeEvalContext): Re
                         // Support pytest.param()
                         if (it is PyCallExpression && it.isCalleeName(PyTestFQNames.PYTEST_PARAM))
                             it.argumentList?.let { argumentList ->
-                                argumentList.arguments.filterNot { it is PyKeywordArgument }.let { arguments ->
+                                argumentList.arguments.filterNot { arg -> arg is PyKeywordArgument }.let { arguments ->
                                     when (arguments.size) {
                                         // pytest.param('single-value')
                                         1 -> context.getType(arguments[0])

@@ -71,7 +71,8 @@ public class PyLightProjectDescriptor extends LightProjectDescriptor {
     final VirtualFile home =
             LocalFileSystem.getInstance().refreshAndFindFileByPath(PathManager.getHomePath() + path);
 
-    modifiableModel.addRoot(home, OrderRootType.CLASSES);
+      assert home != null;
+      modifiableModel.addRoot(home, OrderRootType.CLASSES);
     modifiableModel.commit();
   }
 }

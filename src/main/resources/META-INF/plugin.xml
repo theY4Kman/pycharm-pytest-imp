@@ -14,7 +14,7 @@
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="202.5984.4"/>
+    <idea-version since-build="223" until-build="232.*"/>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
@@ -28,7 +28,6 @@
         <runLineMarkerContributor language="Python"
                                   implementationClass="com.y4kstudios.pytestimp.runconfigs.PyTestLineMarkerContributor"/>
         <runConfigurationProducer implementation="com.y4kstudios.pytestimp.runconfigs.PyTestImpConfigurationProducer"/>
-        <projectService serviceImplementation="com.y4kstudios.pytestimp.PyTestImpService"/>
         <!--suppress PluginXmlCapitalization -->
         <projectConfigurable instance="com.y4kstudios.pytestimp.PyTestImpSettingsConfigurable"
                              parentId="com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable"

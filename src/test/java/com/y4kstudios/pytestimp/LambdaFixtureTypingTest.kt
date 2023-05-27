@@ -5,7 +5,6 @@ import com.jetbrains.python.psi.PyTypedElement
 import com.jetbrains.python.psi.types.TypeEvalContext
 import junit.framework.ComparisonFailure
 import org.intellij.lang.annotations.Language
-import org.junit.Ignore
 import org.junit.Test
 
 class LambdaFixtureTypingTest : PyTestTestCase() {
@@ -111,7 +110,7 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
 
             @pytest.fixture
             def my_toplevel_pytest_fixture():
-                return ${fixtureValue}
+                return $fixtureValue
         """
 
         val testFile = "${baseFile.trimIndent()}\n\n${caretDef.trimIndent()}"
@@ -205,7 +204,7 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
 
             @pytest.fixture
             def my_toplevel_pytest_fixture():
-                yield ${fixtureValue}
+                yield $fixtureValue
         """
 
         val testFile = "${baseFile.trimIndent()}\n\n${caretDef.trimIndent()}"

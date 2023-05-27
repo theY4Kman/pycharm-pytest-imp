@@ -2,7 +2,7 @@ package com.y4kstudios.pytestimp.fixtures
 
 import com.jetbrains.python.nameResolver.FQNamesProvider
 
-open class BaseFQNames constructor(private val myIsClass: Boolean, vararg names: String) : FQNamesProvider {
+open class BaseFQNames(private val myIsClass: Boolean, vararg names: String) : FQNamesProvider {
     private val myNames: Array<out String> = names
 
     override fun getNames(): Array<out String> {
@@ -15,7 +15,7 @@ open class BaseFQNames constructor(private val myIsClass: Boolean, vararg names:
 }
 
 
-class LambdaFixtureFQNames constructor(vararg names: String) : BaseFQNames(false, *names) {
+class LambdaFixtureFQNames(vararg names: String) : BaseFQNames(false, *names) {
     companion object {
         val LAMBDA_FIXTURE = LambdaFixtureFQNames(
             "tests.util.fixtures.lambda_fixture",
@@ -44,7 +44,7 @@ class LambdaFixtureFQNames constructor(vararg names: String) : BaseFQNames(false
 }
 
 
-class PyTestFQNames constructor(myIsClass: Boolean, vararg names: String) : BaseFQNames(myIsClass, *names) {
+class PyTestFQNames(myIsClass: Boolean, vararg names: String) : BaseFQNames(myIsClass, *names) {
     companion object {
         val PYTEST_PARAM = BaseFQNames(false,
             "pytest.param")
