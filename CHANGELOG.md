@@ -10,6 +10,9 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+**Changed:**
+ - Add support for 2023.3
+
 _To Be Released..._
 
 
