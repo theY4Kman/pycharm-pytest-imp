@@ -10,13 +10,17 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+_To Be Released..._
+
+
+1.1.3, 2023-10-07
+-----------------
+
 **Fixed:**
  - Resolve incorrect renaming behaviour
 
 **Changed:**
  - Add support for 2024.1
-
-_To Be Released..._
 
 
 1.1.2, 2023-10-07
