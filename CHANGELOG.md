@@ -10,6 +10,9 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+**Fixed:**
+ - Resolve incorrect renaming behaviour
+
 **Changed:**
  - Add support for 2024.1
 

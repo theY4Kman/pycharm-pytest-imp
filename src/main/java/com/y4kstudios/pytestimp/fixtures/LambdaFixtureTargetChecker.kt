@@ -27,8 +27,14 @@ class LambdaFixtureTargetChecker : PyReferenceCustomTargetChecker {
         val resolveTarget = reference.resolve()
 
         if (resolveTarget is PyTargetExpression) {
+            if (resolveTarget.findAssignmentCall()?.isLambdaFixtureImplicitRef() != true) {
+                return false
+            }
+
             val context = TypeEvalContext.codeAnalysis(resolveTarget.project, resolveTarget.containingFile)
-            return getFixtures(module, resolveTarget, context).firstOrNull()?.resolveTarget == to
+            return getFixtures(module, resolveTarget, context)
+                .filterNot { it.resolveTarget == resolveTarget }
+                .firstOrNull()?.resolveTarget == to
         }
 
         if (resolveTarget is PyNamedParameter) {

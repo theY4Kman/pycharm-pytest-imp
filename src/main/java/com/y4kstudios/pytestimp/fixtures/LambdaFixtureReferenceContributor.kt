@@ -7,6 +7,7 @@ import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.*
 import com.intellij.psi.util.parentOfType
 import com.intellij.util.ProcessingContext
+import com.intellij.util.asSafely
 import com.intellij.util.containers.ContainerUtil
 import com.jetbrains.python.BaseReference
 import com.jetbrains.python.codeInsight.typing.PyTypingTypeProvider
@@ -102,7 +103,18 @@ class LambdaFixtureReference(expression: PyExpression, fixture: PyTestFixture) :
              */
             val context = TypeEvalContext.codeAnalysis(element.project, element.containingFile)
             val module = ModuleUtilCore.findModuleForPsiElement(element) ?: return false
-            return getFixtures(module, this.element, context).firstOrNull()?.resolveTarget == element
+            val resolveTarget =
+                getFixtures(module, this.element, context)
+                    .mapNotNull { it.resolveTarget }
+                    .filterNot { it == this.element }
+                    .firstOrNull()
+                    ?: return false
+
+            if (resolveTarget.asSafely<PyTargetExpression>()?.findAssignmentCall()?.isLambdaFixtureImplicitRef() != true) {
+                return false
+            }
+
+            return element == resolveTarget
         }
 
         return false
