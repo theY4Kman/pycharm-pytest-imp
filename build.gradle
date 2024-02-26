@@ -56,12 +56,20 @@ dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.13.1'
 }
 
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     type.set('PY')
     version.set(ide_version)
     pluginName.set('pytest imp')
 
+    downloadSources.set(true)
     plugins.set([
         'python',
 
