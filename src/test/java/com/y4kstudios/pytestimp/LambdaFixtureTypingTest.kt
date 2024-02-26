@@ -396,7 +396,7 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
     }
 
     private fun doTestLambdaParamsFixtureType_Union(@Language("Python") caretDef: String) {
-        doTestLambdaParamsFixtureType("[1, 2.0, 'c']", "int | float | LiteralString", caretDef)
+        doTestLambdaParamsFixtureType("[1, 2.0, 'c']", "int | float | str", caretDef)
     }
 
     fun testLambdaParamsFixtureTypeFromPytestParam() {
@@ -493,7 +493,7 @@ class LambdaFixtureTypingTest : PyTestTestCase() {
     }
 
     private fun doTestLambdaPytestParamsFixtureType_Union(@Language("Python") caretDef: String) {
-        doTestLambdaPytestParamsFixtureType("int | float | LiteralString", caretDef)
+        doTestLambdaPytestParamsFixtureType("int | float | str", caretDef)
     }
 
     fun testLambdaPytestParamsFixtureTypeFromPytestParam() {

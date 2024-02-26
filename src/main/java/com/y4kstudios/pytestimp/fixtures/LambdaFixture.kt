@@ -14,7 +14,7 @@ import com.intellij.psi.util.QualifiedName
 import com.intellij.psi.util.parentOfType
 import com.intellij.util.Processor
 import com.intellij.util.asSafely
-import com.jetbrains.extensions.python.isCalleeName
+import com.jetbrains.python.extensions.python.isCalleeName
 import com.jetbrains.python.codeInsight.typing.PyTypingTypeProvider
 import com.jetbrains.python.nameResolver.NameResolverTools
 import com.jetbrains.python.psi.*

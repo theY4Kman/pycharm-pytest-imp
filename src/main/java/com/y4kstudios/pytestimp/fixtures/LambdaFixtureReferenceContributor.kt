@@ -252,7 +252,7 @@ private object LambdaFixtureReferenceProvider : PsiReferenceProvider() {
             ?: return emptyArray()
         return arrayOf(
             if (fixture.isLambdaFixture()) LambdaFixtureReference(namedParam, fixture)
-            else PyTestFixtureReference(namedParam, fixture)
+            else PyTestFixtureReference(namedParam, fixture, null)
         )
     }
 }

@@ -1,6 +1,6 @@
 buildscript {
     project.ext.kotlin_version = '1.9.0'
-    project.ext.ide_version = '233-EAP-SNAPSHOT'
+    project.ext.ide_version = '241-EAP-SNAPSHOT'
 
     repositories {
         mavenCentral()
@@ -12,7 +12,7 @@ buildscript {
 
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '1.16.0'
+    id 'org.jetbrains.intellij' version '1.17.1'
 }
 
 project.ext {
@@ -74,12 +74,12 @@ intellij {
         'python',
 
         // https://plugins.jetbrains.com/plugin/227-psiviewer/versions/stable
-        'PsiViewer:233.2',
+        'PsiViewer:241-SNAPSHOT',
 
         // XXX(zk): this version number must be manually looked up waaay too often;
         //          is there a way to pull this version number automatically?
         // https://plugins.jetbrains.com/plugin/8195-toml/versions/stable
-        'org.toml.lang:233.9102.6',
+        'org.toml.lang:241.13688.21',
     ])
 
     patchPluginXml {
@@ -94,8 +94,8 @@ intellij {
             </ul>
         ''')
 
-        sinceBuild.set("223")
-        untilBuild.set("233.*")
+        sinceBuild.set("241")
+        untilBuild.set("241.*")
     }
 }
 

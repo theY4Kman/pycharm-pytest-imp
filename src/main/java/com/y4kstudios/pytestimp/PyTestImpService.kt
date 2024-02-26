@@ -4,6 +4,9 @@ import ca.szc.configparser.Ini
 import ca.szc.configparser.exceptions.NoOptionError
 import ca.szc.configparser.exceptions.NoSectionError
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
+import com.intellij.commandInterface.commandLine.CommandLineLanguage
+import com.intellij.commandInterface.commandLine.psi.CommandLineArgument
+import com.intellij.commandInterface.commandLine.psi.CommandLineFile
 import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
@@ -15,9 +18,6 @@ import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.execution.ParametersListUtil
-import com.jetbrains.commandInterface.commandLine.CommandLineLanguage
-import com.jetbrains.commandInterface.commandLine.psi.CommandLineArgument
-import com.jetbrains.commandInterface.commandLine.psi.CommandLineFile
 import org.tomlj.Toml
 import org.tomlj.TomlParseResult
 import java.io.BufferedReader
