@@ -24,6 +24,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightProjectDescriptor;
 import com.jetbrains.python.PythonMockSdk;
+import com.jetbrains.python.PythonTestUtil;
 import com.jetbrains.python.psi.LanguageLevel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +32,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Project descriptor (extracted from {@link com.jetbrains.python.fixtures.PyTestCase}) and should be used with it.
  * @author Ilya.Kazakevich
- */
+*/
 public class PyLightProjectDescriptor extends LightProjectDescriptor {
 
   @Nullable
@@ -55,24 +56,25 @@ public class PyLightProjectDescriptor extends LightProjectDescriptor {
 
   @Override
   public Sdk getSdk() {
-    return myName == null ? PythonMockSdk.create(myLevel, getAdditionalRoots()) : PythonMockSdk.create(myName);
+    return myName == null
+           ? PythonMockSdk.create(myLevel, getAdditionalRoots())
+           : PythonMockSdk.create(PythonTestUtil.getTestDataPath() + "/" + myName);
   }
 
   /**
    * @return additional roots to add to mock python
    * @apiNote ignored when name is provided.
    */
-  protected VirtualFile[] getAdditionalRoots() {
+  protected VirtualFile @NotNull [] getAdditionalRoots() {
     return VirtualFile.EMPTY_ARRAY;
   }
 
   protected void createLibrary(ModifiableRootModel model, final String name, final String path) {
     final Library.ModifiableModel modifiableModel = model.getModuleLibraryTable().createLibrary(name).getModifiableModel();
     final VirtualFile home =
-            LocalFileSystem.getInstance().refreshAndFindFileByPath(PathManager.getHomePath() + path);
+      LocalFileSystem.getInstance().refreshAndFindFileByPath(PathManager.getHomePath() + path);
 
-      assert home != null;
-      modifiableModel.addRoot(home, OrderRootType.CLASSES);
+    modifiableModel.addRoot(home, OrderRootType.CLASSES);
     modifiableModel.commit();
   }
 }
