@@ -102,6 +102,10 @@ tasks {
         untilBuild = "242.*"
     }
 
+    buildPlugin {
+        archiveBaseName = "pytest imp"
+    }
+
     publishPlugin {
         channels = listOf("stable")
         token = providers.gradleProperty("publishToken")
