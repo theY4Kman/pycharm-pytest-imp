@@ -313,15 +313,44 @@ internal fun PyCallExpression.getLambdaFixtureType(context: TypeEvalContext): Re
         }
 
         val arguments = this.argumentList?.arguments
-        val refParents =
-                if (arguments.isNullOrEmpty()) listOf(this.parentOfType<PyTargetExpression>() ?: return null)
-                else arguments.filterIsInstance<PyStringLiteralExpression>()
-        val fixtureRefs = refParents.map { it.references.firstOrNull { ref -> ref is LambdaFixtureReference || ref is PyTestFixtureReference } }
+        val fixtureRefs = mutableListOf<PsiReference>()
+
+        // Implicit reference to fixture from higher scope
+        //   e.g. `muffin = lambda_fixture()`
+        if (arguments.isNullOrEmpty()) {
+            val target = this.parentOfType<PyAssignmentStatement>()
+                ?.targetsToValuesMapping
+                ?.first { it.second == this }
+                ?.first
+
+            if (target != null) {
+                val fixtureName = target.name
+                val fixture = getFixtures(target, context).firstOrNull { it.name == fixtureName && it.resolveTarget != target }
+                if (fixture != null) {
+                    val fixtureRef =
+                        if (fixture.isLambdaFixture()) LambdaFixtureReference(target, fixture)
+                        else PyTestFixtureReference(target, fixture, null)
+                    fixtureRefs.add(fixtureRef)
+                }
+            }
+        }
+
+        // Potentially, named references to other fixtures
+        //  e.g. `muffin = lambda_fixture('gwar')`
+        else {
+            arguments.filterIsInstance<PyStringLiteralExpression>()
+                .mapNotNull {
+                    it.references.firstOrNull {
+                        ref -> ref is LambdaFixtureReference || ref is PyTestFixtureReference
+                    }
+                }
+                .toCollection(fixtureRefs)
+        }
 
         return when (fixtureRefs.size) {
-            1 -> fixtureRefs.first()?.let { getFixtureReferenceType(it, context, this) }
+            1 -> getFixtureReferenceType(fixtureRefs.first(), context, this)
             else -> Ref(PyTupleType.create(this, fixtureRefs.map {
-                it?.let { getFixtureReferenceType(it, context, this)?.get() }
+                it.let { getFixtureReferenceType(it, context, this)?.get() }
             }))
         }
 

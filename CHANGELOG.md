@@ -10,6 +10,9 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+**Features:**
+ - Add proper typing for implicit reference lambda fixtures (e.g. `apple = lambda_fixture()`)
+
 **Changed:**
  - Add support for 2024.2
 
