@@ -10,13 +10,17 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+_To Be Released..._
+
+
+1.2.0, 2024-05-28
+-----------------
+
 **Features:**
  - Add proper typing for implicit reference lambda fixtures (e.g. `apple = lambda_fixture()`)
 
 **Changed:**
  - Add support for 2024.2
-
-_To Be Released..._
 
 
 1.1.3, 2023-10-07

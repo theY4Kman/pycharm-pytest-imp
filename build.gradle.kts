@@ -1,7 +1,7 @@
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 group = "com.y4kstudios"
-version = "1.1.3"
+version = "1.2.0"
 
 buildscript {
     val kotlinVersion = "1.9.0"
