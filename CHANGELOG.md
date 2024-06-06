@@ -10,6 +10,9 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+**Fixed:**
+ - Resolve improper typing for async yield fixtures
+
 _To Be Released..._
 
 

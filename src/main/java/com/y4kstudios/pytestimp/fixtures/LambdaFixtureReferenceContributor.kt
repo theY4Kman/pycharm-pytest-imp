@@ -127,7 +127,7 @@ internal fun unwrapAwaitableType(coroutineOrAwaitableType: PyType?): Ref<PyType?
 
     if (genericType != null && classType != null) {
         val qName = classType.classQName
-        if ("typing.Awaitable" == qName) {
+        if (arrayOf("typing.Awaitable", "typing.AsyncGenerator").contains(qName)) {
             return Ref.create(ContainerUtil.getOrElse(genericType.elementTypes, 0, null))
         }
         if (PyTypingTypeProvider.COROUTINE == qName) {
