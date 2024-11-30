@@ -47,9 +47,13 @@ class LambdaFixtureReference(expression: PyExpression, fixture: PyTestFixture) :
         val call = getCall()
             ?: return getPyTestFixtureFunctionType(getFunction(), context)
 
-        val type = call.getLambdaFixtureType(context)?.get() ?: return null
-
         val targetExpression = getTargetExpression()
+
+        val type =
+            targetExpression?.getLambdaFixtureAnnotationType(context)?.get()
+                ?: call.getLambdaFixtureType(context)?.get()
+                ?: return null
+
         // Handle destructuring assignments
         if (targetExpression != null && targetExpression.parent is PyTupleExpression) {
             // Trying to destructure a non-destructurable fixture call is an erroneous situation

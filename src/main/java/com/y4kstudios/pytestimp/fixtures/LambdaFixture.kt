@@ -20,6 +20,7 @@ import com.jetbrains.python.nameResolver.NameResolverTools
 import com.jetbrains.python.psi.*
 import com.jetbrains.python.psi.impl.PyEvaluator
 import com.jetbrains.python.psi.resolve.PyResolveContext
+import com.jetbrains.python.psi.types.PyClassTypeImpl
 import com.jetbrains.python.psi.types.PyTupleType
 import com.jetbrains.python.psi.types.PyType
 import com.jetbrains.python.psi.types.PyUnionType
@@ -377,6 +378,26 @@ internal fun PyTargetExpression.findAssignmentCall(): PyCallExpression? {
     val assignmentExpr = this.parentOfType<PyAssignmentStatement>() ?: return null
     val assignedValue = assignmentExpr.assignedValue
     return assignedValue as? PyCallExpression
+}
+
+/**
+ * If a lambda_fixture (or similar) target name is explicitly annotated with `LambdaFixture[V]`,
+ * return the type of `V`.
+ */
+internal fun PyTargetExpression.getLambdaFixtureAnnotationType(context: TypeEvalContext): Ref<PyType>? {
+    val annotation = this.annotation?.value ?: return null
+    if (annotation !is PySubscriptionExpression) return null
+
+    val qualifier = annotation.qualifier ?: return null
+    if (!NameResolverTools.isNameShortCut(qualifier, LambdaFixtureFQNames.LAMBDA_FIXTURE_TYPE)) return null
+
+    val index = annotation.indexExpression as? PyTypedElement ?: return null
+    val annotationType = context.getType(index)?.let {
+        if (it is PyClassTypeImpl) it.toInstance()
+        else it
+    } ?: return null
+
+    return Ref(annotationType)
 }
 
 internal fun PyTargetExpression.isAnyLambdaFixture(): Boolean =

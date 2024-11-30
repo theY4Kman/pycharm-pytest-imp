@@ -10,6 +10,9 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+**Features:**
+ - Add support for explicit typing annotations on lambda fixtures (e.g. `pear: LambdaFixture[str] = static_fixture(123)`)
+
 _To Be Released..._
 
 

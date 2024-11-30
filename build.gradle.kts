@@ -5,7 +5,7 @@ version = "1.2.1"
 
 buildscript {
     val kotlinVersion = "1.9.0"
-    val ideVersion = "242-EAP-SNAPSHOT"
+    val ideVersion = "2024.2.2"
 
     project.extra.set("kotlinVersion", kotlinVersion)
     project.extra.set("ideVersion", ideVersion)
@@ -47,6 +47,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${project.ext.get("kotlinVersion")}")
 
     testImplementation("junit", "junit", "4.13.1")
+    testImplementation("org.opentest4j", "opentest4j", "1.3.0")
 
     intellijPlatform {
         pycharmProfessional(project.ext.get("ideVersion").toString())

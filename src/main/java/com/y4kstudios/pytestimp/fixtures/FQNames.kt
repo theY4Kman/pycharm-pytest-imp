@@ -40,6 +40,9 @@ class LambdaFixtureFQNames(vararg names: String) : BaseFQNames(false, *names) {
         val PRECONDITION_FIXTURE = LambdaFixtureFQNames(
             "tests.util.fixtures.precondition_fixture",
             "pytest_common_subject.precondition_fixture")
+
+        val LAMBDA_FIXTURE_TYPE = LambdaFixtureFQNames(
+            "pytest_lambda.fixtures.LambdaFixture")
     }
 }
 

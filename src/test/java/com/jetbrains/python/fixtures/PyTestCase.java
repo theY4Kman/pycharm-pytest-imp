@@ -442,7 +442,7 @@ public abstract class PyTestCase extends UsefulTestCase {
   }
 
   public static String getHelpersPath() {
-    return new File(PythonHelpersLocator.getPythonCommunityPath(), "helpers").getPath();
+    return new File(PythonHelpersLocator.getPythonCommunityPath().toString(), "helpers").getPath();
   }
 
 
