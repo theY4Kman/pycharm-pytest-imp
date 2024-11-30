@@ -10,13 +10,17 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+_To Be Released..._
+
+
+1.3.0, 2024-11-30
+-----------------
+
 **Features:**
  - Add support for explicit typing annotations on lambda fixtures (e.g. `pear: LambdaFixture[str] = static_fixture(123)`)
 
 **Changed:**
  - Add support for 2024.3
-
-_To Be Released..._
 
 
 1.2.1, 2024-05-28
