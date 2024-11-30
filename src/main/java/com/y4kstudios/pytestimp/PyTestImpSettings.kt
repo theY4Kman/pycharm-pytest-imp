@@ -19,11 +19,10 @@ class PyTestImpSettingsComponent(val project: Project) {
 
     init {
         myPyTestIniPathText.addBrowseFolderListener(
-            @Suppress("DialogTitleCapitalization")
-            "Choose py.test Config File",
-            "Path to pytest.ini or pyproject.toml:",
             project,
             FileChooserDescriptor(true, false, false, false, false, false)
+                .withTitle(@Suppress("DialogTitleCapitalization") "Choose py.test Config File")
+                .withDescription("Path to pytest.ini or pyproject.toml:")
                 .withFileFilter {
                     Comparing.equal(it.name, "pytest.ini", SystemInfo.isFileSystemCaseSensitive)
                             || Comparing.equal(it.name, "pyproject.toml", SystemInfo.isFileSystemCaseSensitive)

@@ -5,7 +5,7 @@ version = "1.2.1"
 
 buildscript {
     val kotlinVersion = "1.9.0"
-    val ideVersion = "2024.2.2"
+    val ideVersion = "243-EAP-SNAPSHOT"
 
     project.extra.set("kotlinVersion", kotlinVersion)
     project.extra.set("ideVersion", ideVersion)
@@ -58,19 +58,27 @@ dependencies {
         bundledPlugins("Pythonid")
         plugins(
             // https://plugins.jetbrains.com/plugin/227-psiviewer/versions/stable
-            "PsiViewer:242.4697",
+            "PsiViewer:243.7768",
 
             // XXX(zk): this version number must be manually looked up waaay too often;
             //          is there a way to pull this version number automatically?
             // https://plugins.jetbrains.com/plugin/8195-toml/versions/stable
-            "org.toml.lang:242.10180.28",
+            "org.toml.lang:243.21565.122",
         )
+
+        pluginVerifier()
     }
 }
 
 intellijPlatform {
     pluginConfiguration {
         name = "pytest imp"
+    }
+
+    verifyPlugin {
+        ides {
+            recommended()
+        }
     }
 }
 
@@ -100,7 +108,7 @@ tasks {
     patchPluginXml {
         changeNotes = extractChangeNotes()
         sinceBuild = "241"
-        untilBuild = "242.*"
+        untilBuild = "243.*"
     }
 
     buildPlugin {

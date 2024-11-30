@@ -134,69 +134,10 @@ internal fun QualifiedName.tryResolveAndSplit(context: QNameResolveContext): Qua
 }
 
 class PyTestImpConfigurationProducer : AbstractPythonTestConfigurationProducer<PyTestConfiguration>() {
-    companion object {
-        /**
-         * Creates [ConfigurationTarget] to make  configuration work with provided element.
-         * Also reports working dir what should be set to configuration to work correctly
-         * @return [target, workingDirectory]
-         */
-        internal fun getTargetForConfig(configuration: PyAbstractTestConfiguration,
-                                        baseElement: PsiElement): PyTestTargetForConfig? {
-            var element = baseElement
-            // Go up until we reach top of the file
-            // asking configuration about each element if it is supported or not
-            // If element is supported -- set it as configuration target
-            do {
-                if (isPytestIniConfiguredTestElement(element)) {
-                    when (element) {
-                        is PyQualifiedNameOwner -> { // Function, class, method
-
-                            val module = configuration.module ?: return null
-
-                            val elementFile = element.containingFile as? PyFile ?: return null
-                            val workingDirectory = getDirectoryForFileToBeImportedFrom(elementFile)
-                                ?: return null
-                            val context = QNameResolveContext(ModuleBasedContextAnchor(module),
-                                evalContext = TypeEvalContext.userInitiated(configuration.project, null),
-                                folderToStart = workingDirectory.virtualFile)
-                            val parts = element.tryResolveAndSplit(context) ?: return null
-                            val qualifiedName = parts.getElementNamePrependingFile(workingDirectory)
-                            return PyTestTargetForConfig.PyTestPythonTarget(qualifiedName.toString(), workingDirectory.virtualFile, parts)
-                        }
-                        is PsiFileSystemItem -> {
-                            val virtualFile = element.virtualFile
-
-                            val workingDirectory: VirtualFile = when (element) {
-                                is PyFile -> getDirectoryForFileToBeImportedFrom(element)?.virtualFile
-                                is PsiDirectory -> virtualFile
-                                else -> return null
-                            } ?: return null
-                            return PyTestTargetForConfig.PyTestPathTarget(virtualFile.path, workingDirectory)
-                        }
-                    }
-                }
-                element = element.parent ?: break
-            }
-            while (element !is PsiDirectory) // if parent is folder, then we are at file level
-            return null
-        }
-
-        /**
-         * Inspects file relative imports, finds farthest and returns folder with imported file
-         */
-        private fun getDirectoryForFileToBeImportedFrom(file: PyFile): PsiDirectory? {
-            val maxRelativeLevel = file.fromImports.maxOfOrNull { it.relativeLevel } ?: 0
-            var elementFolder = file.parent ?: return null
-            for (i in 1..maxRelativeLevel) {
-                elementFolder = elementFolder.parent ?: return null
-            }
-            return elementFolder
-        }
-    }
 
     override val configurationClass: Class<PyTestConfiguration> = PyTestConfiguration::class.java
 
-    private val myConfigurationFactory = PyTestFactory()
+    private val myConfigurationFactory = PythonTestConfigurationType.getInstance().pyTestFactory
 
     override fun getConfigurationFactory() = myConfigurationFactory
 
@@ -258,4 +199,69 @@ internal fun PyTestConfiguration.getWorkingDirectoryAsVirtual(): VirtualFile? {
         return LocalFileSystem.getInstance().findFileByPath(workingDirectory)
     }
     return null
+}
+
+/**
+ * Creates [ConfigurationTarget] to make  onfiguration work with provided element.
+ * Also reports working dir what should be set to configuration to work correctly
+ * @return [target, workingDirectory]
+ */
+internal fun getTargetForConfig(configuration: PyAbstractTestConfiguration,
+                                baseElement: PsiElement
+): PyTestTargetForConfig? {
+    var element = baseElement
+    // Go up until we reach top of the file
+    // asking configuration about each element if it is supported or not
+    // If element is supported -- set it as configuration target
+    do {
+        if (isPytestIniConfiguredTestElement(element)) {
+            when (element) {
+                is PyQualifiedNameOwner -> { // Function, class, method
+
+                    val module = configuration.module ?: return null
+
+                    val elementFile = element.containingFile as? PyFile ?: return null
+                    val workingDirectory = getDirectoryForFileToBeImportedFrom(elementFile)
+                        ?: return null
+                    val context = QNameResolveContext(
+                        ModuleBasedContextAnchor(module),
+                        evalContext = TypeEvalContext.userInitiated(configuration.project, null),
+                        folderToStart = workingDirectory.virtualFile
+                    )
+                    val parts = element.tryResolveAndSplit(context) ?: return null
+                    val qualifiedName = parts.getElementNamePrependingFile(workingDirectory)
+                    return PyTestTargetForConfig.PyTestPythonTarget(
+                        qualifiedName.toString(),
+                        workingDirectory.virtualFile,
+                        parts
+                    )
+                }
+                is PsiFileSystemItem -> {
+                    val virtualFile = element.virtualFile
+
+                    val workingDirectory: VirtualFile = when (element) {
+                        is PyFile -> getDirectoryForFileToBeImportedFrom(element)?.virtualFile
+                        is PsiDirectory -> virtualFile
+                        else -> return null
+                    } ?: return null
+                    return PyTestTargetForConfig.PyTestPathTarget(virtualFile.path, workingDirectory)
+                }
+            }
+        }
+        element = element.parent ?: break
+    }
+    while (element !is PsiDirectory) // if parent is folder, then we are at file level
+    return null
+}
+
+/**
+ * Inspects file relative imports, finds farthest and returns folder with imported file
+ */
+private fun getDirectoryForFileToBeImportedFrom(file: PyFile): PsiDirectory? {
+    val maxRelativeLevel = file.fromImports.maxOfOrNull { it.relativeLevel } ?: 0
+    var elementFolder = file.parent ?: return null
+    for (i in 1..maxRelativeLevel) {
+        elementFolder = elementFolder.parent ?: return null
+    }
+    return elementFolder
 }
