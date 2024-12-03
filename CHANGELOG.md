@@ -10,6 +10,9 @@ and this project DOES NOT adhere to [Semantic Versioning](https://semver.org/spe
 [To Be Released]
 ----------------
 
+**Changed:**
+ - Raised minimum version to 2024.3 to avoid compat issues
+
 _To Be Released..._
 
 

@@ -107,7 +107,7 @@ tasks {
 
     patchPluginXml {
         changeNotes = extractChangeNotes()
-        sinceBuild = "241"
+        sinceBuild = "243"
         untilBuild = "243.*"
     }
 
