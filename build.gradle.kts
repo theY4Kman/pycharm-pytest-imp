@@ -3,7 +3,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 
 group = "com.y4kstudios"
-version = "1.3.1"
+version = "1.3.2"
 
 buildscript {
     val kotlinVersion = "2.1.0"
