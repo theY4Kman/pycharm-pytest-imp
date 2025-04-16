@@ -1,11 +1,13 @@
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
+import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 
 group = "com.y4kstudios"
 version = "1.3.1"
 
 buildscript {
-    val kotlinVersion = "1.9.0"
-    val ideVersion = "243-EAP-SNAPSHOT"
+    val kotlinVersion = "2.1.0"
+    val ideVersion = "251-EAP-SNAPSHOT"
 
     project.extra.set("kotlinVersion", kotlinVersion)
     project.extra.set("ideVersion", ideVersion)
@@ -22,9 +24,9 @@ plugins {
     // Java support
     id("java")
     // Kotlin support
-    id("org.jetbrains.kotlin.jvm") version "1.9.0"
+    id("org.jetbrains.kotlin.jvm") version "2.1.0"
     // Gradle IntelliJ Plugin
-    id("org.jetbrains.intellij.platform") version "2.0.0-beta3"
+    id("org.jetbrains.intellij.platform") version "2.5.0"
 }
 
 repositories {
@@ -44,26 +46,23 @@ dependencies {
     implementation("org.tomlj:tomlj:1.0.0")
     implementation("ca.szc.configparser:java-configparser:0.2")
 
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${project.ext.get("kotlinVersion")}")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${project.extra.get("kotlinVersion")}")
 
     testImplementation("junit", "junit", "4.13.1")
     testImplementation("org.opentest4j", "opentest4j", "1.3.0")
 
     intellijPlatform {
-        pycharmProfessional(project.ext.get("ideVersion").toString())
+        pycharmProfessional(project.ext.get("ideVersion").toString(), useInstaller = false)
 
-        instrumentationTools()
-        testFramework(TestFrameworkType.Platform.JUnit4)
+        testFramework(TestFrameworkType.Platform)
 
-        bundledPlugins("Pythonid")
-        plugins(
+        bundledPlugins("PythonCore")
+        pluginsInLatestCompatibleVersion(
             // https://plugins.jetbrains.com/plugin/227-psiviewer/versions/stable
-            "PsiViewer:243.7768",
+            "PsiViewer",
 
-            // XXX(zk): this version number must be manually looked up waaay too often;
-            //          is there a way to pull this version number automatically?
             // https://plugins.jetbrains.com/plugin/8195-toml/versions/stable
-            "org.toml.lang:243.21565.122",
+            "org.toml.lang",
         )
 
         pluginVerifier()
@@ -75,7 +74,7 @@ intellijPlatform {
         name = "pytest imp"
     }
 
-    verifyPlugin {
+    pluginVerification {
         ides {
             recommended()
         }
@@ -96,7 +95,9 @@ tasks {
          */
         dependencies {
             intellijPlatform {
-                bundledPlugin("com.intellij.platform.images")
+                bundledPlugins(
+                    "com.intellij.platform.images",
+                )
             }
         }
     }
@@ -107,8 +108,8 @@ tasks {
 
     patchPluginXml {
         changeNotes = extractChangeNotes()
-        sinceBuild = "243"
-        untilBuild = "243.*"
+        sinceBuild = "251"
+        untilBuild = "251.*"
     }
 
     buildPlugin {
@@ -166,3 +167,24 @@ fun extractChangeNotes(): String {
     res.append(footer)
     return res.toString()
 }
+
+// Source: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-recipes.html#resolve-plugin-from-jetbrains-marketplace-in-the-latest-compatible-version
+val IntelliJPlatformDependenciesExtension.pluginRepository by lazy {
+    PluginRepositoryFactory.create("https://plugins.jetbrains.com")
+}
+
+fun IntelliJPlatformDependenciesExtension.pluginsInLatestCompatibleVersion(vararg pluginIds: String) =
+    plugins(provider {
+        pluginIds.map { pluginId ->
+            val platformType = intellijPlatform.productInfo.productCode
+            val platformVersion = intellijPlatform.productInfo.buildNumber
+
+            val plugin = pluginRepository.pluginManager.searchCompatibleUpdates(
+                build = "$platformType-$platformVersion",
+                xmlIds = listOf(pluginId),
+            ).firstOrNull()
+                ?: throw GradleException("No plugin update with id='$pluginId' compatible with '$platformType-$platformVersion' found in JetBrains Marketplace")
+
+            "${plugin.pluginXmlId}:${plugin.version}"
+        }
+    })
