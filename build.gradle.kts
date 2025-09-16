@@ -6,8 +6,8 @@ group = "com.y4kstudios"
 version = "1.3.2"
 
 buildscript {
-    val kotlinVersion = "2.1.0"
-    val ideVersion = "251-EAP-SNAPSHOT"
+    val kotlinVersion = "2.2.20"
+    val ideVersion = "252-EAP-SNAPSHOT"
 
     project.extra.set("kotlinVersion", kotlinVersion)
     project.extra.set("ideVersion", ideVersion)
@@ -23,10 +23,14 @@ buildscript {
 plugins {
     // Java support
     id("java")
+
     // Kotlin support
-    id("org.jetbrains.kotlin.jvm") version "2.1.0"
+    // NOTE: must match kotlinVersion in buildscript. Can't use any useful variable here, because... reasons.
+    //       https://github.com/gradle/gradle/issues/9830
+    id("org.jetbrains.kotlin.jvm") version "2.2.20"
+
     // Gradle IntelliJ Plugin
-    id("org.jetbrains.intellij.platform") version "2.5.0"
+    id("org.jetbrains.intellij.platform") version "2.9.0"
 }
 
 repositories {
@@ -83,7 +87,11 @@ intellijPlatform {
 
 tasks {
     runIde {
-        jvmArgs = listOf("-Didea.ProcessCanceledException=disabled")
+        jvmArgs = arrayListOf(
+            "-XX:+UnlockDiagnosticVMOptions",
+            "-Didea.ProcessCanceledException=disabled",
+        )
+
     }
 
     test {
