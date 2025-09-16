@@ -91,7 +91,9 @@ public abstract class PyTestCase extends UsefulTestCase {
   protected void tearDown() throws Exception {
     try {
       if (myFixture != null) {
-        PyNamespacePackagesService.getInstance(myFixture.getModule()).resetAllNamespacePackages();
+        if (myFixture.getModule() != null) {
+          PyNamespacePackagesService.getInstance(myFixture.getModule()).resetAllNamespacePackages();
+        }
         PyModuleNameCompletionContributor.ENABLED = true;
         setLanguageLevel(null);
 
@@ -119,6 +121,10 @@ public abstract class PyTestCase extends UsefulTestCase {
 
   protected void assertSdkRootsNotParsed(@NotNull PsiFile currentFile) {
     final Sdk testSdk = PythonSdkUtil.findPythonSdk(currentFile);
+    if (testSdk == null) {
+      LOG.warn("testSdk is null. assertSdkRootsNotParsed is skipped");
+      return;
+    }
     for (VirtualFile root : testSdk.getRootProvider().getFiles(OrderRootType.CLASSES)) {
       assertRootNotParsed(currentFile, root, null);
     }
@@ -356,7 +362,12 @@ public abstract class PyTestCase extends UsefulTestCase {
 
   protected static void assertNotParsed(PsiFile file) {
     assertInstanceOf(file, PyFileImpl.class);
-    assertNull("Operations should have been performed on stubs but caused file to be parsed: " + file.getVirtualFile().getPath(),
+    VirtualFile virtualFile = file.getVirtualFile();
+    String path = virtualFile.getPath();
+    String name = virtualFile.getName();
+    String errorMessage = "Operations should have been performed on stubs but caused file to be parsed: " + path;
+    String tip = "As a starting point for an investigation, a breakpoint can be set in com.intellij.psi.impl.source.PsiFileImpl#loadTreeElement with a condition `getName().equals(\"" + name + "\")`.\nThen the stacktrace can be investigated to find the root cause.";
+    assertNull(errorMessage + "\n" + tip,
                ((PyFileImpl)file).getTreeElement());
   }
 
@@ -598,5 +609,20 @@ public abstract class PyTestCase extends UsefulTestCase {
         prevIndex = nextIndex;
       }
     }
+  }
+
+  public static void fixme(@NotNull String comment, @NotNull Class<? extends Throwable> c, @NotNull Runnable test) {
+    try {
+      test.run();
+    }
+    catch (Throwable failedError) {
+      if (c.isInstance(failedError)) {
+        // fix-me tests are supposed to fail
+        return;
+      }
+      throw failedError;
+    }
+    // the fix-me test passed -> the bug/feature was fixed!
+    fail("Test (" + comment + ") FIXED!");
   }
 }

@@ -56,7 +56,9 @@ dependencies {
     testImplementation("org.opentest4j", "opentest4j", "1.3.0")
 
     intellijPlatform {
-        pycharmProfessional(project.ext.get("ideVersion").toString(), useInstaller = false)
+        pycharmProfessional(project.ext.get("ideVersion").toString()) {
+            useInstaller = false
+        }
 
         testFramework(TestFrameworkType.Platform)
 
@@ -105,6 +107,10 @@ tasks {
             intellijPlatform {
                 bundledPlugins(
                     "com.intellij.platform.images",
+                    "com.intellij.modules.json",
+                )
+                bundledModule(
+                    "intellij.json.backend",
                 )
             }
         }
@@ -116,8 +122,8 @@ tasks {
 
     patchPluginXml {
         changeNotes = extractChangeNotes()
-        sinceBuild = "251"
-        untilBuild = "251.*"
+        sinceBuild = "252"
+        untilBuild = "252.*"
     }
 
     buildPlugin {
