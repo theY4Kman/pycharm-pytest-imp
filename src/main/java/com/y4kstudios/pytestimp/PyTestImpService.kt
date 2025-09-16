@@ -4,9 +4,9 @@ import ca.szc.configparser.Ini
 import ca.szc.configparser.exceptions.NoOptionError
 import ca.szc.configparser.exceptions.NoSectionError
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
-import com.intellij.commandInterface.commandLine.CommandLineLanguage
 import com.intellij.commandInterface.commandLine.psi.CommandLineArgument
 import com.intellij.commandInterface.commandLine.psi.CommandLineFile
+import com.intellij.lang.Language
 import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
@@ -241,14 +241,16 @@ abstract class PyTestConfig(val project: Project) {
     open val cmdlineString: String by lazy { ParametersListUtil.join(cmdlineOpts) }
 
     /** Parsed CommandLine PsiFile */
-    open val cmdlineFile: CommandLineFile by lazy {
+    open val cmdlineFile: CommandLineFile? by lazy {
         val psiFileFactory = project.service<PsiFileFactory>()
-        psiFileFactory.createFileFromText(CommandLineLanguage.INSTANCE, "py.test $cmdlineString") as CommandLineFile
+        val cmdLineLanguage = Language.findLanguageByID("CommandLine") ?: return@lazy null
+        psiFileFactory.createFileFromText(cmdLineLanguage, "py.test $cmdlineString") as? CommandLineFile
     }
 
     /** Pytest plugins explicitly loaded/excluded by `-p plugin`/`-p no:plugin` in `addopts` */
     open val loadedPlugins: List<PytestLoadPlugin> by lazy {
-        cmdlineFile.options
+        (cmdlineFile ?: return@lazy emptyList())
+            .options
             .filter { it.optionName == "-p" }
             .mapNotNull { PsiTreeUtil.getNextSiblingOfType(it, CommandLineArgument::class.java) }
             .map {
