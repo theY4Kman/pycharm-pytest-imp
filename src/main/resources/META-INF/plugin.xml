@@ -16,9 +16,13 @@
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
     <idea-version since-build="223" until-build="232.*"/>
 
-    <depends>com.intellij.modules.platform</depends>
-    <depends>com.intellij.modules.lang</depends>
-    <depends>com.intellij.modules.python</depends>
+    <dependencies>
+        <plugin id="com.intellij.modules.platform" />
+        <plugin id="com.intellij.modules.lang" />
+        <plugin id="com.intellij.modules.python" />
+        <module name="intellij.commandInterface" />
+    </dependencies>
+
 
     <extensions defaultExtensionNs="com.intellij">
         <psi.referenceContributor language="Python"

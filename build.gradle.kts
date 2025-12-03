@@ -7,7 +7,7 @@ version = "1.3.3"
 
 buildscript {
     val kotlinVersion = "2.2.20"
-    val ideVersion = "252-EAP-SNAPSHOT"
+    val ideVersion = "253.28294.256-EAP-SNAPSHOT"
 
     project.extra.set("kotlinVersion", kotlinVersion)
     project.extra.set("ideVersion", ideVersion)
@@ -30,7 +30,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm") version "2.2.20"
 
     // Gradle IntelliJ Plugin
-    id("org.jetbrains.intellij.platform") version "2.9.0"
+    id("org.jetbrains.intellij.platform") version "2.10.4"
 }
 
 repositories {
@@ -62,7 +62,13 @@ dependencies {
 
         testFramework(TestFrameworkType.Platform)
 
-        bundledPlugins("PythonCore")
+        bundledPlugins(
+            "PythonCore",
+            "Pythonid",
+        )
+        bundledModules(
+            "intellij.commandInterface",
+        )
         pluginsInLatestCompatibleVersion(
             // https://plugins.jetbrains.com/plugin/227-psiviewer/versions/stable
             "PsiViewer",
@@ -82,7 +88,12 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            recommended()
+            // XXX(zk): right now, the reported latest build, 253.28294.256, is not available in the repos. It exists,
+            //          just not as an artifact under the build version `253.28294.256`.
+            // TODO(zk): re-enable this after the repo sorts its shit out
+            // recommended()
+
+            create("PY", project.ext.get("ideVersion").toString()) {}
         }
     }
 }
@@ -93,7 +104,6 @@ tasks {
             "-XX:+UnlockDiagnosticVMOptions",
             "-Didea.ProcessCanceledException=disabled",
         )
-
     }
 
     test {
@@ -122,8 +132,8 @@ tasks {
 
     patchPluginXml {
         changeNotes = extractChangeNotes()
-        sinceBuild = "252"
-        untilBuild = "252.*"
+        sinceBuild = "253"
+        untilBuild = "253.*"
     }
 
     buildPlugin {
